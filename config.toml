@@ -50,5 +50,5 @@ theme = "mainroad"
 
 # Custom social links
 [[Params.widgets.social.custom]]
-  title = "技术公众号"
-  url = "http://example.com"       
+  title = "知乎"
+  url = "https://www.zhihu.com/collection/670801136"       
