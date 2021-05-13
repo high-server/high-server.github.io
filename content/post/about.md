@@ -5,11 +5,12 @@ draft: true
 description: "Example article description"
 categories:
   - "杂谈"
+author: zhangyanfei  
 
 # Theme-Defined params
 #lead: "大家好，我们是搜狗商业技术团队！" # Lead text
 #comments: false # Enable Disqus comments for specific page
-authorbox: false # Enable authorbox for specific page
+authorbox: true # Enable authorbox for specific page
 
 ---
 大家好，我们是搜狗商业技术团队！
