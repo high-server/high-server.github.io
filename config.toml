@@ -15,6 +15,7 @@ theme = "mainroad"
   authorbox = true # Show authorbox at bottom of pages if true
   pager = true # Show pager navigation (prev/next links) at the bottom of pages if true
   dateformat = "2006-01-02" # Change the format of dates
+  post_meta = ["author", "date", "categories", "translations"] # Order of post meta information
 
 [Params.style.vars]
   highlightColor = "#e22d30" # Override highlight color
