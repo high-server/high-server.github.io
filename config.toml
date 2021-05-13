@@ -1,0 +1,54 @@
+baseURL = "https://high-server.github.io/"
+languageCode = "en-us"
+title = "架构技术漫谈"
+paginate = "5"
+theme = "mainroad"
+
+[Author] # Used in authorbox
+  name = "搜狗商业技术团队"
+  bio = "负责搜狗浏览器、手机助手等项目的后端开发工作，技术公众号「搜狗商业技术团队」！"
+  avatar = "img/icon.jpg"
+
+[Params]
+  description = "搜狗商业技术团队的博客" # Site description. Used in meta description
+  copyright = "搜狗商业技术团队" # Footer copyright holder, otherwise will use site title
+  authorbox = true # Show authorbox at bottom of pages if true
+  pager = true # Show pager navigation (prev/next links) at the bottom of pages if true
+  dateformat = "2006-01-02" # Change the format of dates
+
+[Params.style.vars]
+  highlightColor = "#e22d30" # Override highlight color
+
+  # Override font-family sets. Secondary font-family set responsible for pre, code, kbd, and samp tags font
+  # Take care of different quotes OR escaping symbols in these params if necessary
+  fontFamilyPrimary = "'Open Sans', Helvetica, Arial, sans-serif"
+  fontFamilySecondary = "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
+
+[Params.logo]
+  image = "img/icon.jpg" # Logo image. Path relative to "static"
+  title = "架构技术漫谈" # Logo title, otherwise will use site title
+  subtitle = "提高单机性能，用好多机架构！" # Logo subtitle 
+
+[Params.sidebar]
+  home = "left" # Configure layout for home page
+  list = "left"  # Configure layout for list pages
+  single = false # Configure layout for single pages
+  # Enable widgets in given order
+  widgets = ["search", "categories", "taglist","recent",  "social", "languages"]
+  # alternatively "ddg-search" can be used, to search via DuckDuckGo
+  # widgets = ["ddg-search", "recent", "categories", "taglist", "social", "languages"]
+
+[Params.widgets]
+  recent_num = 5 # Set the number of articles in the "Recent articles" widget
+  categories_counter = true # Enable counter for each category in "Categories" widget
+  tags_counter = true # Enable counter for each tag in "Tags" widget 
+
+[Params.widgets.social]
+  # Enable parts of social widget
+  github = "high-server"
+  #email = "zhangyanfei@sogou-inc.com"  
+
+# Custom social links
+[[Params.widgets.social.custom]]
+  title = "技术公众号"
+  url = "http://example.com"       
