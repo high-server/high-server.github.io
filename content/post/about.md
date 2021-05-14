@@ -7,6 +7,9 @@ categories:
   - "杂谈"
 #author: zhangyanfei  
 
+#Comment
+gitment: true
+
 # Theme-Defined params
 #lead: "大家好，我们是搜狗商业技术团队！" # Lead text
 #comments: false # Enable Disqus comments for specific page
