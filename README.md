@@ -14,3 +14,13 @@
 ```
 #hugo server --buildDrafts
 ```
+
+- 4.编译静态页面到docs目录下
+```
+#hogo
+```
+
+- 5.发布
+```
+#git push origin main
+```

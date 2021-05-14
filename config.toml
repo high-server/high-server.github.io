@@ -3,6 +3,7 @@ languageCode = "en-us"
 title = "架构技术漫谈"
 paginate = "5"
 theme = "mainroad"
+publishDir = "docs"
 
 [Author] # Used in authorbox
   name = "搜狗商业技术团队"
