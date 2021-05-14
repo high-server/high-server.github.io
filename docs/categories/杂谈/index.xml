@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>杂谈 on 架构技术漫谈</title>
-    <link>http://localhost:1313/categories/%E6%9D%82%E8%B0%88/</link>
+    <link>https://high-server.github.io/categories/%E6%9D%82%E8%B0%88/</link>
     <description>Recent content in 杂谈 on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 10 May 2021 19:59:02 +0800</lastBuildDate><atom:link href="http://localhost:1313/categories/%E6%9D%82%E8%B0%88/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 10 May 2021 19:59:02 +0800</lastBuildDate><atom:link href="https://high-server.github.io/categories/%E6%9D%82%E8%B0%88/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>关于我们</title>
-      <link>http://localhost:1313/post/about/</link>
+      <link>https://high-server.github.io/post/about/</link>
       <pubDate>Mon, 10 May 2021 19:59:02 +0800</pubDate>
       
-      <guid>http://localhost:1313/post/about/</guid>
+      <guid>https://high-server.github.io/post/about/</guid>
       <description>&lt;p&gt;大家好，我们是搜狗商业技术团队！&lt;/p&gt;</description>
     </item>
     

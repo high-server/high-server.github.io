@@ -8,7 +8,7 @@ publishDir = "docs"
 [Author] # Used in authorbox
   name = "搜狗商业技术团队"
   bio = "负责搜狗浏览器、手机助手等项目的后端开发工作，技术公众号「搜狗商业技术团队」！"
-  avatar = "img/icon.jpg"
+  avatar = "img/avatars/team.jpg"
 
 [Params]
   description = "搜狗商业技术团队的博客" # Site description. Used in meta description
@@ -27,7 +27,7 @@ publishDir = "docs"
   fontFamilySecondary = "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
 
 [Params.logo]
-  image = "img/icon.jpg" # Logo image. Path relative to "static"
+  image = "img/avatars/team.jpg" # Logo image. Path relative to "static"
   title = "架构技术漫谈" # Logo title, otherwise will use site title
   subtitle = "提高单机性能，用好多机架构！" # Logo subtitle 
 
