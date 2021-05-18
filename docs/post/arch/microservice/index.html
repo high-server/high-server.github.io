@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>浅谈微服务 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">浅谈微服务</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-18T10:17:01&#43;08:00">2021-05-18</time></div></div>
+		</header><div class="content post__content clearfix">
+			<p>虽说<a href="https://martinfowler.com/articles/microservices.html">微服务</a>是一个老生常谈的话题，在 <a href="https://www.infoq.cn/topic/microservice">infoq</a> 或者 <a href="https://insights.thoughtworks.cn/tag/microservices/">thoughtworks</a> 上可以找到很多案例，不过可惜的是其中相当比例的案例是失败的案例，究其原因，除了<a href="https://microservices.io/index.html">技术门槛</a>之外，主要是因为很多人脱离了实际情况，只是为了微服务而微服务。本文通过一个例子带领大家从头到尾体验一下微服务的演化过程，不仅要做到知其然，更要做到知其所以然。</p>
+<p>假设我们正在开发一个在线购物项目，其主要功能包括商城、推荐、评论、用户等，它是一个典型的<a href="https://microservices.io/patterns/monolithic.html">单体架构</a>：不同团队的技术人员工作在同一个版本库上，系统功能按模块划分，不同模块之间通过本地函数调用，通常操作同一个数据库。</p>
+<p><img src="/img/microservice/01.png" alt="微服务"></p>
+<p>在项目早期，单体架构往往能很好的适应快速迭代的需求，不过随着项目的发展，项目本身会变得复杂，其弊端不可避免的出现，比如下面列举的一些情况：</p>
+<ul>
+<li>因为大家都工作在同一个版本库上，所以可能会遇到：商城模块完成了新功能，准备上线，结果推荐模块刚提交了还没来得及测试的代码，于是不得不推迟上线。</li>
+<li>不同的需求采用不同的技术栈：负责评论模块的同事想用 PHP + MySQL 来构建系统，负责用户模块的同事却想用 Golang + PostgreSql 来构建系统。</li>
+<li>有的模块需要高性能 CPU，有的模块需要大内存，因为不同的模块是耦合在一起的，所以我们的服务器不得不同时具备高性能 CPU，大内存，从而增加了成本。</li>
+</ul>
+<p>如何解决此类问题？<a href="https://zh.wikipedia.org/wiki/%E5%BA%B7%E5%A8%81%E5%AE%9A%E5%BE%8B">康威定律</a>给出了很好的建议：「设计系统的架构受制于产生这些设计的组织的沟通结构」，通俗点说就是：「有什么样的组织架构就会设计出什么样的系统架构」。在本例中，因为不同的团队负责不同的模块，所以很自然的可以通过模块来把系统切分成商城、推荐、评论、用户等几个独立的服务：每个服务有自己独立的版本库和数据库，服务之间通过 RPC 来通信。不同的服务拥有自己的版本库，可以使用适合自己的技术栈和硬件，独立开发独立部署。</p>
+<p>一个需要注意的问题是如何确定服务粒度的大小，虽然按照康威定律的描述只要按照组织架构的大小来确定服务的大小即可，但是如何规划一个合理的团队规模呢？实际上并没有一个精确的答案，我们需要按照客观情况来确定一个适合自己的大小适中的服务粒度，过小的粒度会导致服务之间强耦合，过大的粒度则背离了微服务的初衷，Uber 甚至还针对服务粒度大小问题发明了一个<a href="https://mp.weixin.qq.com/s/1P_5mMeZQ8YQzybLmjENLg">宏服务</a>的概念，有兴趣的读者不妨看看。</p>
+<p><img src="/img/microservice/02.png" alt="微服务"></p>
+<p>当我们把单体架构切分成独立的服务之后，原本模块间本地的函数调用变成了服务间远程的 RPC 调用，我们不得不处理服务治理之类的问题，随着微服务数量的增加，问题会变得越来越棘手，好在随着云原生的发展，特别是 <a href="https://kubernetes.io/">K8S</a> 和 <a href="https://istio.io/">istio</a> 等技术的成熟，我们的架构可以演化到 <a href="https://www.servicemesher.com/">service mesh</a> 阶段，通过 sidecar 透明实现服务治理。</p>
+<p><img src="/img/microservice/03.png" alt="微服务"></p>
+<p>如果仅仅是把原本模块间本地的函数调用变成了服务间远程的 RPC 调用的话，那么我们的微服务很可能会沦为「<a href="https://skyao.io/talk/202007-microservice-avoiding-distributed-monoliths/">分布式单体</a>」。问题的症结在于过度使用 RPC，导致服务与服务之间强耦合，解决方法是引入 Event，通过 Event 实现服务与服务的解耦。</p>
+<p>看看如何实现下面的业务逻辑：当一个用户注册后，要在商城里给此用户一张优惠券。</p>
+<ul>
+<li>使用 RPC（强调做什么）：当用户模块创建了一个新用户的时候，通过 RPC 调用商城模块给新此用户一张优惠券，过程中用户模块和商城模块是强耦合的。</li>
+<li>使用 Event（强调发生了什么）：当用户模块创建了一个新用户的时候，它发出一个 UserCreated 事件，商城模块观察到对应的事件后，给新此用户一张优惠券，过程中用户模块和商城模块是弱耦合的。</li>
+</ul>
+<p>实际情况中应该按需求来选择使用 RPC 或则 Event：如果是业务逻辑的实现部分，倾向于选择使用 RPC；如果是业务逻辑完成之后的后续通知部分，强烈建议选择使用 Event。</p>
+<p><img src="/img/microservice/04.png" alt="微服务"></p>
+<p>服务部署好了之后，接下来我们还需要考虑如何暴露服务以供前端调用，比如用户浏览某个商品的详情页，内容包括商品数据、以及对应的推荐数据和评论数据，如果直接操作服务的话，那么需要多次查询商品服务、推荐服务、评论服务，并不可取，此时可以加入 <a href="https://microservices.io/patterns/apigateway.html">API Gateway</a> 充当代理，前端只要请求 API Gateway 一次就可以拿到数据。</p>
+<p><img src="/img/microservice/05.png" alt="微服务"></p>
+<p>有了 API Gateway 之后，它可以帮我们完成聚合之类的逻辑。不过有一个问题是前端可能有多种不同的类型，比如 PC 前端，Mobile 前端，它们的业务逻辑不可避免的会有各种各样的差异，如果在 API Gateway 中处理这些差异的话，那么会出现坏味道，为了解决此类问题，我们引入 <a href="https://microservices.io/patterns/apigateway.html">BFF</a>（Backend For Frontend），每一种前端都有属于自己的 BFF，用来处理专属于自己的业务逻辑，至于 API Gateway，则只处理鉴权，日志等公共业务逻辑。</p>
+<p><img src="/img/microservice/06.png" alt="微服务"></p>
+<p>微服务是个极其复杂的概念，本文仅就一些表面问题浅谈一二，其他诸如 <a href="https://microservices.io/patterns/data/saga.html">SAGA</a> 之类的复杂问题，由于篇幅所限，并未涉猎，大家如果有兴趣的话请自行查阅。</p>
+<p>最后把 <a href="https://martinfowler.com/">Martin Fowler</a> 在 <a href="https://www.martinfowler.com/books/eaa.html">PoEAA</a> 中提出的<a href="https://martinfowler.com/bliki/FirstLaw.html">分布式对象第一定律</a>送给大家：不要分布你的对象！套用这个说法的话，不难引申出微服务第一定律：不要使用微服务！虽然话里有一些戏虐的成份，但是它至少告诫我们在面对微服务的时候要怀揣着一颗敬畏的心。</p>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/about/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">关于我们</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>
