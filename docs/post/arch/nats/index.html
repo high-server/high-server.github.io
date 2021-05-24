@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>浅谈NATS消息系统 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">浅谈NATS消息系统</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-24T10:28:44&#43;08:00">2021-05-24</time></div></div>
+		</header><div class="content post__content clearfix">
+			<p>我用过很多消息系统，比如：简单的 <a href="https://redis.io/topics/streams-intro">Redis Streams</a>；高效的 <a href="https://kafka.apache.org/">Kafaka</a> 等等，不过自从我把编程语言切换到 Golang 以后，总觉得必须找个用 Golang 开发的消息系统才配得上门当户对，原本我已经和小家碧玉的 <a href="https://nsq.io/">NSQ</a> 厮守终生，不过当我认识了上流社会 <a href="https://landscape.cncf.io/">CNCF</a> 钦定的大家闺秀 <a href="https://nats.io/">NATS</a> 后，刹那间就仿佛徐志摩遇到了林徽因，扭头就给结发妻子写了休书。</p>
+<h2 id="installation">INSTALLATION</h2>
+<p>服务端 <a href="https://github.com/nats-io/nats-server">nats-server</a>，客户端 <a href="https://github.com/nats-io/natscli">nats</a>，监控工具 <a href="https://github.com/nats-io/nats-top">nats-top</a>，性能测试工具 <a href="https://github.com/nats-io/nats.go/tree/master/examples/nats-bench">nats-bench</a>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; go get github.com/nats-io/nats-server/v2
+
+shell&gt; git clone https://github.com/nats-io/natscli.git
+shell&gt; cd natscli/nats
+shell&gt; go get .
+
+shell&gt; go get github.com/nats-io/nats-top
+
+shell&gt; git clone https://github.com/nats-io/nats.go.git
+shell&gt; cd nats.go/examples/nats-bench
+shell&gt; go get .
+</code></pre></div><p>需要说明的是，关于 stream 有新旧两种架构的服务端实现，其中旧的 NATS Streaming Server 架构已经过时，如果你是初学者，直接使用新的 NATS JetStream 架构即可。</p>
+<h2 id="bench">BENCH</h2>
+<p>开多个命令行窗口，分别启动 nats-server，nats-top，nats-bench：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; nats-server -js -m <span style="color:#ae81ff">8222</span>
+shell&gt; nats-top
+shell&gt; nats-bench -n <span style="color:#ae81ff">100000000</span> -np <span style="color:#ae81ff">10</span> -ms <span style="color:#ae81ff">1</span> a
+</code></pre></div><p><img src="/img/nats/nats-top.png" alt="nats-top"></p>
+<p>如上所示，高达一千万的 MPS，我就问你 OK 不 OK！Beautiful 不 Beautiful！</p>
+<h2 id="mode">MODE</h2>
+<h3 id="publish-subscribehttpsdocsnatsionats-conceptspubsub"><a href="https://docs.nats.io/nats-concepts/pubsub">PUBLISH SUBSCRIBE</a>：</h3>
+<p>NATS 实现了一对多发布订阅消息模型。当 publisher 往 subject 上发布一条消息后，此 subject 上所有 subscriber 都能收到 此消息，属于一种广播。</p>
+<p><img src="/img/nats/publish_subscribe.png" alt="Publish Subscribe"></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; nats sub source.subject
+Subscribing on source.subject
+<span style="color:#f92672">[</span><span style="color:#75715e">#1] Received on &#34;source.subject&#34;</span>
+ZNQz8dCWc5
+<span style="color:#f92672">[</span><span style="color:#75715e">#2] Received on &#34;source.subject&#34;</span>
+d1EggZJYVT
+
+shell&gt; nats sub source.subject
+Subscribing on source.subject
+<span style="color:#f92672">[</span><span style="color:#75715e">#1] Received on &#34;source.subject&#34;</span>
+ZNQz8dCWc5
+<span style="color:#f92672">[</span><span style="color:#75715e">#2] Received on &#34;source.subject&#34;</span>
+d1EggZJYVT
+
+shell&gt; nats pub source.subject <span style="color:#e6db74">&#34;{{Random 10 10}}&#34;</span> --count <span style="color:#ae81ff">2</span>
+Published <span style="color:#ae81ff">10</span> bytes to <span style="color:#e6db74">&#34;source.subject&#34;</span>
+Published <span style="color:#ae81ff">10</span> bytes to <span style="color:#e6db74">&#34;source.subject&#34;</span>
+</code></pre></div><h3 id="queue-groupshttpsdocsnatsionats-conceptsqueue"><a href="https://docs.nats.io/nats-concepts/queue">QUEUE GROUPS</a>：</h3>
+<p>如果我们把 subscriber 分组，那么当 publisher 往 subject 上发布一条消息后，同一组里只有一个 subscriber 会收到此消息，从而实现了负载均衡。</p>
+<p><img src="/img/nats/queue_groups.png" alt="Queue Groups"></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; nats sub source.subject --queue foo
+Subscribing on source.subject
+<span style="color:#f92672">[</span><span style="color:#75715e">#1] Received on &#34;source.subject&#34;</span>
+LFuJZBjnxV
+
+shell&gt; nats sub source.subject --queue foo
+Subscribing on source.subject
+<span style="color:#f92672">[</span><span style="color:#75715e">#1] Received on &#34;source.subject&#34;</span>
+76kAIoUYCI
+
+shell&gt; nats pub source.subject <span style="color:#e6db74">&#34;{{Random 10 10}}&#34;</span> --count <span style="color:#ae81ff">2</span>
+Published <span style="color:#ae81ff">10</span> bytes to <span style="color:#e6db74">&#34;source.subject&#34;</span>
+Published <span style="color:#ae81ff">10</span> bytes to <span style="color:#e6db74">&#34;source.subject&#34;</span>
+</code></pre></div><h3 id="request-replyhttpsdocsnatsionats-conceptsreqreply"><a href="https://docs.nats.io/nats-concepts/reqreply">REQUEST REPLY</a>：</h3>
+<p>一般来说，消息系统是以异步的形式工作，也就是说，publisher 往 subject 上发布一条消息后，并不在意 subscriber 的 reply 是什么。如果 publisher 在意 subscriber 的 reply 是什么的话，那么消息系统就应该以同步的形式工作，在具体实现中，是通过两次发布订阅来完成的：当 publisher 发布消息后，它会订阅一个特定的 subject，当 subscriber 处理完消息后，它会把 reply 发布到这个特定的 subject。当然，整个过程对使用者是透明的。</p>
+<p><img src="/img/nats/request_reply.png" alt="Request Reply"></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; nats reply <span style="color:#e6db74">&#39;weather.&gt;&#39;</span> --command <span style="color:#e6db74">&#34;curl -s wttr.in/{{1}}?format=1&#34;</span>
+Listening on <span style="color:#e6db74">&#34;weather.&gt;&#34;</span> in group <span style="color:#e6db74">&#34;NATS-RPLY-22&#34;</span>
+<span style="color:#f92672">[</span><span style="color:#75715e">#0] Received on subject &#34;weather.beijing&#34;:</span>
+
+shell&gt; nats request weather.beijing <span style="color:#e6db74">&#39;&#39;</span>
+Sending request on <span style="color:#e6db74">&#34;weather.beijing&#34;</span>
+Received on <span style="color:#e6db74">&#34;_INBOX.7mc3ox00ma7WYWyNjuBSsw.NBtCmYbp&#34;</span>
+☀️ +30°C
+</code></pre></div><p>通过 weather 例子，我们可以发现 request reply 模式已经有了 RPC 的味道。</p>
+<h2 id="microservice">MICROSERVICE</h2>
+<p>正是因为 NATS 具备了 RPC 的能力，所以在微服务中采用 NATS 后，系统会更清晰。</p>
+<p><img src="/img/nats/microservice1.png" alt="传统微服务架构"></p>
+<p><img src="/img/nats/microservice2.png" alt="采用 NATS 的微服务架构"></p>
+<p>说明：以上图片来自于「<a href="https://www.slideshare.net/nats_io/the-zen-of-high-performance-messaging-with-nats-76985268">The Zen of High Performance Messaging with NATS</a>」。</p>
+<h2 id="monitor">MONITOR</h2>
+<p>说到监控，除了前面提到的 nats-top 之外，还有诸如 <a href="https://github.com/devfacet/natsboard">natsboard</a> 之类的 UI 可供选择：</p>
+<p><img src="/img/nats/natsboard.png" alt="natsboard"></p>
+<p>现实中，大家都知道，徐志摩和林徽因的结局，终究还是错付了，不过我对 NATS 的爱不会变，她是我的不二之选，至少在更好的消息系统出现前如此。</p>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/microservice/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">浅谈微服务</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

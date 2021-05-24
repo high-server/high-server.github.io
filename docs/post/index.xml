@@ -6,7 +6,16 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 18 May 2021 10:17:01 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 24 May 2021 10:28:44 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>浅谈NATS消息系统</title>
+      <link>https://high-server.github.io/post/arch/nats/</link>
+      <pubDate>Mon, 24 May 2021 10:28:44 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/nats/</guid>
+      <description>&lt;p&gt;我用过很多消息系统，比如：简单的 &lt;a href=&#34;https://redis.io/topics/streams-intro&#34;&gt;Redis Streams&lt;/a&gt;；高效的 &lt;a href=&#34;https://kafka.apache.org/&#34;&gt;Kafaka&lt;/a&gt; 等等，不过自从我把编程语言切换到 Golang 以后，总觉得必须找个用 Golang 开发的消息系统才配得上门当户对，原本我已经和小家碧玉的 &lt;a href=&#34;https://nsq.io/&#34;&gt;NSQ&lt;/a&gt; 厮守终生，不过当我认识了上流社会 &lt;a href=&#34;https://landscape.cncf.io/&#34;&gt;CNCF&lt;/a&gt; 钦定的大家闺秀 &lt;a href=&#34;https://nats.io/&#34;&gt;NATS&lt;/a&gt; 后，刹那间就仿佛徐志摩遇到了林徽因，扭头就给结发妻子写了休书。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>浅谈微服务</title>
       <link>https://high-server.github.io/post/arch/microservice/</link>
