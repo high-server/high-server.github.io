@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>你真的理解容器吗？ - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">你真的理解容器吗？</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-25T11:03:14&#43;08:00">2021-05-25</time></div></div>
+		</header><div class="content post__content clearfix">
+			<p>提到“容器”，大家应该都不陌生，不是什么特别新鲜的技术了，受众也越来越广了，但是会用就真的理解吗？以下几个相关问题你真的能做到了然于胸吗？</p>
+<ol>
+<li>“容器”是怎么把自己隔离开的呐？</li>
+<li>“容器”能使用宿主机的全部资源吗？</li>
+<li>“容器”有自己的文件系统吗？</li>
+<li>“容器”与虚拟机有什么区别？</li>
+</ol>
+<h2 id="引言">引言</h2>
+<p>要想真正理解容器，就必须先了解其发展历程，因为容器也是操作系统功能逐渐强大过程中催生的神器。这里我们只关注几个关键技术时间节点。   </p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">时间</th>
+<th style="text-align:center">事件</th>
+<th style="text-align:left">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1979年UNIX V7</td>
+<td style="text-align:center">引入chroot系统调用</td>
+<td style="text-align:left">修改进程根目录，隔离每个进程的文件访问</td>
+</tr>
+<tr>
+<td style="text-align:left">2006年Google</td>
+<td style="text-align:center">引入Process Container（CGroups）</td>
+<td style="text-align:left">对进程的资源(CPU, memory, 磁盘, network)进行限制&amp;隔离</td>
+</tr>
+<tr>
+<td style="text-align:left">2008年LXC</td>
+<td style="text-align:center">LinuX Containers</td>
+<td style="text-align:left">使用cgroups和Linux namespaces实现第一个Linux容器</td>
+</tr>
+<tr>
+<td style="text-align:left">2013年Docker</td>
+<td style="text-align:center">LibContainer</td>
+<td style="text-align:left">容器镜像完善了容器管理生态，开始普及</td>
+</tr>
+<tr>
+<td style="text-align:left">2018年Kubernetes</td>
+<td style="text-align:center">开放&amp;规范</td>
+<td style="text-align:left">容器化如火如荼</td>
+</tr>
+</tbody>
+</table>
+<p>现在，我们知道了几个关键名词了，那么他们是怎么协作产生容器的呐，为了清晰些，先放个大体的关系图在这里，然后我们下面分开探讨下。</p>
+<p><img src="/img/container/container.png" alt="container"></p>
+<h2 id="一容器是一种特殊的进程">一、容器是一种特殊的进程</h2>
+<p>容器是通过 Linux 的 <strong>Namespace</strong> 和 <strong>Cgroup</strong> 等系统控制实现的一套隔离环境。运行中的容器就是一组开启了多个 Namespace(PID/Mount/Network等)进行隔离 的特殊应用进程，然后通过 Cgroups 来控制这个特殊进程对宿主机各个资源(CPU/内存等)的使用限制。</p>
+<h3 id="1-namespace-隔离">1. NAMESPACE 隔离</h3>
+<p>来看下我们部署的一个demo应用。</p>
+<p><img src="/img/container/docker_ps.png" alt="docker_ps"></p>
+<p>你没看错它的进程pid是1，这时你会想这是什么神仙进程，pid是1的不一般都是系统级的初始化进程吗？这正是容器的隔离环境使出的“一叶障目”的伎俩。
+其实你看到的只是容器想让你看到的，实际上在其宿主机的操作系统里，这个demo进程只是一个再普通不过的进程。这里记得这个真实的pid，后续我们还会再次看到它。
+<img src="/img/container/host_ps.png" alt="hostps"></p>
+<p>这便是通过 Linux 的 PID Namespace 来实现的，我们都知道创建子进程可以调用clone系统调用，要实现PID Namespace的隔离，只需要在进行clone系统调用时加上<strong>CLONE_NEWPID</strong>参数即可。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C++" data-lang="C++"><span style="color:#66d9ef">int</span> container_pid <span style="color:#f92672">=</span> clone(container_main, container_stack<span style="color:#f92672">+</span>STACK_IZE, CLONE_NEWPID <span style="color:#f92672">|</span> SIGCHLD, NULL); 
+</code></pre></div><p>这样创建出来的进程就实现了Pid Namespace的隔离，我们看到的进程信息就与宿主机完全分隔开了。
+类似的，可以通过clone时增加相应的 Namespace 控制参数进行“隔离”，如<strong>CLONE_NEWNET</strong>控制Network Namespace、<strong>CLONE_NEWNS</strong>控制Mount Namesapce等。感兴趣的可以自己试一下。</p>
+<h3 id="2-cgroup-限制">2. CGROUP 限制</h3>
+<p>Linux Cgroups是用来限制、控制和分离一个进程组的资源的，包括 CPU、内存、磁盘、网络带宽等等。</p>
+<p>我们可以通过&rsquo;mount -t cgroup&rsquo;命令在机器的/sys/fs/cgroup目录下一探究竟。
+<img src="/img/container/cgroup.png" alt="cgroup">
+可以看到操作系统的相关资源限制都在这里了，它们是以文件系统的方式存在的。具体到某种类型的资源比如CPU，进入cpu子目录就可以看到详细的控制维度。接下来我们一起来看下我们创建的demo应用的相关限制。
+<img src="/img/container/cgroup_task.png" alt="cgroup_task">
+我们会发现/sys/fs/cgroup/cpu下有个docker文件夹，后面的一串数字是容器id，可以通过&rsquo;docker ps&rsquo;进行查看。这个目录下面有很多cpu相关的限制维度，具体的含义大家可以自行搜索更准确些，注意最下面有个tasks文件,它里面存储的正是我们的应用进程在宿主机里真实的进程PID，通过控制这个进程的相关资源来对容器进行资源限制。</p>
+<p>比如我们要控制应用程序只能使用宿主机的30%的 CPU，如果超了就异常退出，避免单个容器的一个死循环之类的神坑拖垮整个宿主机，那么我们要怎么控制呐？参考如下方法通过控制 cpu.cfs_quota_us 和 cpu.cfs_peroid_us 将相应的限制写入控制文件即可。
+<img src="/img/container/cgroup_cpu.png" alt="cgroup_cpu"></p>
+<h2 id="二容器有自己的文件系统吗">二、容器有自己的文件系统吗？</h2>
+<p>正如上面通过 clone 系统调用来对容器进行 Namespace 的隔离一样，容器的文件系统则是通过 <strong>chroot</strong> 或者 <strong>pivot</strong> 这两个系统调用来实现的，通过修改容器的根目录视图让我们看起来容器是个被单独封装好的独立个体，对，看起来。
+这样，容器的根目录就变成了一个隔离的子目录，为了让这个目录看起来更像一个系统，往往会在这个目录下增加一些系统的文件、目录和配置，比如 /bin,/etc 等。</p>
+<p>其实容器的这种隔离的文件系统是通过 <strong>RootFS</strong> 也就是容器镜像来完成的。容器镜像通过分层(LAYER)的模式从操作系统所包含的文件目录到应用程序的环境依赖再到应用程序的可执行文件逐层增量进行制造。</p>
+<pre><code>​$ docker image insepct helloworld
+  …………
+      &quot;RootFS&quot;: {
+            &quot;Type&quot;: &quot;layers&quot;,
+            &quot;Layers&quot;: [
+                &quot;sha256:b60e5c3bcef2f42ec42648b3acf7baf6de1fa780ca16d9180f3b4a3f266fe7bc&quot;,
+                &quot;sha256:568944187d9378b07cf2e2432115605b71c36ef566ec77fbf04516aab0bcdf8e&quot;,
+                &quot;sha256:7ea2b60b0a086d9faf2ba0a52d4e2f940d9361ed4179642686d1d8b59460667c&quot;,
+                &quot;sha256:7a287aad297b39792ee705ad5ded9ba839ee3f804fa3fb0b81bb8eb9f9acbf88&quot;,
+                &quot;sha256:df402fd437a15a96bb81965df19fb46142a80a194b895d6ce837e7278c01f907&quot;,
+                &quot;sha256:fa71d4eaf80562e542edb884d98dc8da0acbbc704322e3862c2c0375007e014b&quot;,
+                &quot;sha256:df12cb3b13384a6026e5f4c7fc8eac163e1b7c58fbcbb6a8bd09e1154ceb027a&quot;
+            ]
+        },
+</code></pre><h2 id="三容器与虚拟机的区别">三、容器与虚拟机的区别</h2>
+<p>虚拟机受宠了那么多年，为啥被突如其来的容器蚕食了不少市场呐？我们来看下虚拟机的真实情况。</p>
+<ol>
+<li>性能损耗较大。虚拟机一般都需要在物理实机上通过 Hypervisor 等技术实现硬件虚拟化，而且每个虚拟化出来的虚拟机都必须要安装完整的操作系统来进行控制，这部分本来就会对物理机的资源及性能带来不小的损耗。</li>
+<li>应用程序依赖的操作系统环境要求较为严格。虚机时代开发者们要遵循的一个原则是尽量让自己的开发和测试环境与线上虚机的操作系统&amp;软件环境依赖等都保持一致，否则看似一切就绪的应用一上线就可能会出现各种环境不一致导致的问题。</li>
+</ol>
+<p>当然，虚拟机有其自身的优点，比如隔离更彻底等，我们在这里主要为了讲述容器的优势所以不对虚拟机做过多阐述。</p>
+<p>与虚拟机相比，容器本身就是一种特殊的进程，所以不存在虚拟化带来的资源损耗和虚拟机的操作系统带来的存储空间的损耗。同时，借助于现下各种成熟的打包编排工具及容器镜像，使得开发者们只需要在自己的开发环境将应用程序及相关的环境依赖打包一起部署在容器里就不再需要担心这个软件版本不一致那个依赖不存在导致的线上故障了。</p>
+<h2 id="总结">总结</h2>
+<p>明白了“容器”的核心原理&ndash; Namespace 隔离+ Cgroup 资源限制+ RootFS 文件系统，现在看待一个容器进程是不是如同带了透视镜一般无比清晰呐！另外我们了解了容器相比于虚拟机而言的优势，也就明白了为什么大家越来越喜欢用容器进行线上部署了。</p>
+<p>至于容器的具体编排及应用我们后续可以重点研究下时下受众最广的 Kubernetes，本文只是简单的探究了下容器的遮羞布后面的一小部分原理，更深层次的我们可以后面再一起探讨~~</p>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/nats/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">浅谈NATS消息系统</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>
