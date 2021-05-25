@@ -6,7 +6,31 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 24 May 2021 10:28:44 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 25 May 2021 15:31:27 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>我的应用程序新招了个全能的小秘书</title>
+      <link>https://high-server.github.io/post/arch/k8s-deploy/</link>
+      <pubDate>Tue, 25 May 2021 15:31:27 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/k8s-deploy/</guid>
+      <description>&lt;p&gt;近一年，我的应用程序因为贴近用户需求被推上了热搜 😁 ，不过他也随之变得异常忙碌。来感受下老板和开发童鞋们的吐槽吧~~&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>你真的理解容器吗？</title>
+      <link>https://high-server.github.io/post/arch/container/</link>
+      <pubDate>Tue, 25 May 2021 11:03:14 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/container/</guid>
+      <description>&lt;p&gt;提到“容器”，大家应该都不陌生，不是什么特别新鲜的技术了，受众也越来越广了，但是会用就真的理解吗？以下几个相关问题你真的能做到了然于胸吗？&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;“容器”是怎么把自己隔离开的呐？&lt;/li&gt;
+&lt;li&gt;“容器”能使用宿主机的全部资源吗？&lt;/li&gt;
+&lt;li&gt;“容器”有自己的文件系统吗？&lt;/li&gt;
+&lt;li&gt;“容器”与虚拟机有什么区别？&lt;/li&gt;
+&lt;/ol&gt;</description>
+    </item>
+    
     <item>
       <title>浅谈NATS消息系统</title>
       <link>https://high-server.github.io/post/arch/nats/</link>
