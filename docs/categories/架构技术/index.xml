@@ -1,26 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>架构技术漫谈</title>
-    <link>https://high-server.github.io/</link>
-    <description>Recent content on 架构技术漫谈</description>
+    <title>架构技术 on 架构技术漫谈</title>
+    <link>https://high-server.github.io/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/</link>
+    <description>Recent content in 架构技术 on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 26 May 2021 17:25:49 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Golang 函数和 C 函数深度对比</title>
-      <link>https://high-server.github.io/post/inside-golang/function/</link>
-      <pubDate>Wed, 26 May 2021 17:25:49 +0800</pubDate>
-      
-      <guid>https://high-server.github.io/post/inside-golang/function/</guid>
-      <description>&lt;p&gt;无论是什么语言，函数都是最常被使用到的东西。&lt;/p&gt;
-&lt;p&gt;我们对比一下 Golang 和 C 这两种语言的函数实现，进而我们能真正理解以下两个问题。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;为什么 C 语言只能有一个返回值，而 Golang 中可以返回多个？&lt;/li&gt;
-&lt;li&gt;Golang 函数调用在性能上和 C 比有何差异？&lt;/li&gt;
-&lt;/ul&gt;</description>
-    </item>
-    
+    <lastBuildDate>Tue, 25 May 2021 15:31:27 +0800</lastBuildDate><atom:link href="https://high-server.github.io/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>我的应用程序新招了个全能的小秘书</title>
       <link>https://high-server.github.io/post/arch/k8s-deploy/</link>
@@ -61,15 +47,6 @@
       
       <guid>https://high-server.github.io/post/arch/microservice/</guid>
       <description>&lt;p&gt;虽说&lt;a href=&#34;https://martinfowler.com/articles/microservices.html&#34;&gt;微服务&lt;/a&gt;是一个老生常谈的话题，在 &lt;a href=&#34;https://www.infoq.cn/topic/microservice&#34;&gt;infoq&lt;/a&gt; 或者 &lt;a href=&#34;https://insights.thoughtworks.cn/tag/microservices/&#34;&gt;thoughtworks&lt;/a&gt; 上可以找到很多案例，不过可惜的是其中相当比例的案例是失败的案例，究其原因，除了&lt;a href=&#34;https://microservices.io/index.html&#34;&gt;技术门槛&lt;/a&gt;之外，主要是因为很多人脱离了实际情况，只是为了微服务而微服务。本文通过一个例子带领大家从头到尾体验一下微服务的演化过程，不仅要做到知其然，更要做到知其所以然。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>关于我们</title>
-      <link>https://high-server.github.io/post/about/</link>
-      <pubDate>Mon, 10 May 2021 19:59:02 +0800</pubDate>
-      
-      <guid>https://high-server.github.io/post/about/</guid>
-      <description>&lt;p&gt;大家好，我们是搜狗商业技术团队！&lt;/p&gt;</description>
     </item>
     
   </channel>

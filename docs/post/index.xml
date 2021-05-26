@@ -6,7 +6,21 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 25 May 2021 15:31:27 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 26 May 2021 17:25:49 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Golang 函数和 C 函数深度对比</title>
+      <link>https://high-server.github.io/post/inside-golang/function/</link>
+      <pubDate>Wed, 26 May 2021 17:25:49 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/inside-golang/function/</guid>
+      <description>&lt;p&gt;无论是什么语言，函数都是最常被使用到的东西。&lt;/p&gt;
+&lt;p&gt;我们对比一下 Golang 和 C 这两种语言的函数实现，进而我们能真正理解以下两个问题。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;为什么 C 语言只能有一个返回值，而 Golang 中可以返回多个？&lt;/li&gt;
+&lt;li&gt;Golang 函数调用在性能上和 C 比有何差异？&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
     <item>
       <title>我的应用程序新招了个全能的小秘书</title>
       <link>https://high-server.github.io/post/arch/k8s-deploy/</link>

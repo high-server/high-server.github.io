@@ -2,8 +2,12 @@
 title: "你真的理解容器吗？"
 date: 2021-05-25T11:03:14+08:00
 draft: false
+categories:
+  - "架构技术"
+
 #Comment
 gitment: true
+
 ---
 
 
