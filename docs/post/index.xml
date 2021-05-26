@@ -6,7 +6,16 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 25 May 2021 11:03:14 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 25 May 2021 15:31:27 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>我的应用程序新招了个全能的小秘书</title>
+      <link>https://high-server.github.io/post/arch/k8s-deploy/</link>
+      <pubDate>Tue, 25 May 2021 15:31:27 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/k8s-deploy/</guid>
+      <description>&lt;p&gt;近一年，我的应用程序因为贴近用户需求被推上了热搜 😁 ，不过他也随之变得异常忙碌。来感受下老板和开发童鞋们的吐槽吧~~&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>你真的理解容器吗？</title>
       <link>https://high-server.github.io/post/arch/container/</link>
