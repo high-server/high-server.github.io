@@ -6,7 +6,29 @@
     <description>Recent content on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 26 May 2021 17:25:49 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 06 Jun 2021 15:45:29 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>浅谈pprof</title>
+      <link>https://high-server.github.io/post/arch/pprof/</link>
+      <pubDate>Sun, 06 Jun 2021 15:45:29 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/pprof/</guid>
+      <description>&lt;p&gt;对于大多数 Gopher 而言，一般平时最主要的工作内容除了实现各种无聊的业务逻辑之外，剩下的就是解决各种琐碎的问题。比如：查询性能瓶颈在哪里？查询内存泄漏在哪里？好在 pprof 是处理此类问题的利器，共有两套标准库，分别适用于不同的场景：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://golang.org/pkg/runtime/pprof/&#34;&gt;runtime/pprof&lt;/a&gt;：采集工具型应用运行数据进行分析&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://golang.org/pkg/net/http/pprof/&#34;&gt;net/http/pprof&lt;/a&gt;：采集服务型应用运行时数据进行分析&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;命令行工具「go test」就包含了 runtime/pprof，相关参数请参考「go help testflag」：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;shell&amp;gt; go test -cpuprofile cpu.out -memprofile mem.out -bench .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;不过和 runtime/pprof 相比，更常用的是 net/http/pprof，接下来我们主要通过它来解决一些常见问题，想要激活 net/http/pprof 的话很简单，只要导入对应的包并启动服务即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;import _ &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;net/http/pprof&amp;#34;&lt;/span&gt;
+
+func main&lt;span style=&#34;color:#f92672&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;
+	_ &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; http.ListenAndServe&lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;localhost:6060&amp;#34;&lt;/span&gt;, nil&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;需要注意的是，千万别让外网访问到 pprof，否则可能会导致出现安全问题。有兴趣的读者可以尝试通过 google 搜索「intitle:/debug/pprof/ inurl:/debug/pprof/」看看反面例子。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Golang 函数和 C 函数深度对比</title>
       <link>https://high-server.github.io/post/inside-golang/function/</link>
