@@ -1,7 +1,10 @@
 ---
 title: "我的应用程序新招了个全能的小秘书"
 date: 2021-05-25T15:31:27+08:00
-draft: true
+draft: false
+categories:
+  - "架构技术"
+
 #Comment
 gitment: true
 ---

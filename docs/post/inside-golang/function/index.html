@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Golang 函数和 C 函数深度对比 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Golang 函数和 C 函数深度对比</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-26T17:25:49&#43;08:00">2021-05-26</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/golang%E5%8E%9F%E7%90%86/" rel="category">Golang原理</a>
+	</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>无论是什么语言，函数都是最常被使用到的东西。</p>
+<p>我们对比一下 Golang 和 C 这两种语言的函数实现，进而我们能真正理解以下两个问题。</p>
+<ul>
+<li>为什么 C 语言只能有一个返回值，而 Golang 中可以返回多个？</li>
+<li>Golang 函数调用在性能上和 C 比有何差异？</li>
+</ul>
+<h1 id="一c-语言函数深究">一、C 语言函数深究</h1>
+<p>我们准备一段简单的函数调用代码。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;  </span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">func</span>(<span style="color:#66d9ef">int</span> p){   
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+}  
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()  
+{  
+    <span style="color:#66d9ef">int</span> i;  
+    <span style="color:#66d9ef">for</span>(i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">100000000</span>; i<span style="color:#f92672">++</span>){  
+        func(<span style="color:#ae81ff">2</span>);  
+    }  
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;  
+}
+</code></pre></div><p>用 gcc 来查看下汇编代码。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#75715e"># gcc -S main.c</span>
+</code></pre></div><p>汇编源码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">func:
+        movl    <span style="color:#f92672">%</span>edi, <span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>(<span style="color:#f92672">%</span>rbp)
+        movl    <span style="color:#f92672">%</span>esi, <span style="color:#f92672">-</span><span style="color:#ae81ff">8</span>(<span style="color:#f92672">%</span>rbp)
+        movl    <span style="color:#f92672">%</span>edx, <span style="color:#f92672">-</span><span style="color:#ae81ff">12</span>(<span style="color:#f92672">%</span>rbp)
+        movl    <span style="color:#f92672">%</span>ecx, <span style="color:#f92672">-</span><span style="color:#ae81ff">16</span>(<span style="color:#f92672">%</span>rbp)
+        movl    <span style="color:#f92672">%</span>r8d, <span style="color:#f92672">-</span><span style="color:#ae81ff">20</span>(<span style="color:#f92672">%</span>rbp)
+        movl    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">%</span>eax
+        
+main:
+        movl    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">5</span>, <span style="color:#f92672">%</span>r8d
+        movl    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span>, <span style="color:#f92672">%</span>ecx
+        movl    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">3</span>, <span style="color:#f92672">%</span>edx
+        movl    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span>, <span style="color:#f92672">%</span>esi
+        movl    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">%</span>edi
+        call    func
+       
+        movl    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">0</span>, <span style="color:#f92672">%</span>eax
+</code></pre></div><p>可以看到，在C语言中：</p>
+<p><strong>主要通过寄存器传递参数</strong><br>
+所以，C 语言函数的性能杠杠的。寄存器是整个计算机体系结构中访问最最快的存储了。只有当参数数量大于 6 的时候，才开始使用栈。</p>
+<p><strong>固定 eax 寄存器返回数据</strong><br>
+因为固定使用 eax 寄存器做返回数据之用，所以在 C 语言中无法支持多个返回值。我们接下来看看 Golang 是如何支持多个返回值的。</p>
+<h1 id="二golang-函数深究">二、Golang 函数深究</h1>
+<p>同样先写一段最简单的函数调用代码。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">myFunction</span>(<span style="color:#a6e22e">p1</span>, <span style="color:#a6e22e">p2</span>, <span style="color:#a6e22e">p3</span>,<span style="color:#a6e22e">p4</span>, <span style="color:#a6e22e">p5</span> <span style="color:#66d9ef">int</span>) (<span style="color:#66d9ef">int</span>,<span style="color:#66d9ef">int</span>) {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">a</span> <span style="color:#66d9ef">int</span> = <span style="color:#a6e22e">p1</span><span style="color:#f92672">+</span><span style="color:#a6e22e">p2</span><span style="color:#f92672">+</span><span style="color:#a6e22e">p3</span><span style="color:#f92672">+</span><span style="color:#a6e22e">p4</span><span style="color:#f92672">+</span><span style="color:#a6e22e">p5</span>
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">b</span> <span style="color:#66d9ef">int</span> = <span style="color:#ae81ff">3</span>
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">a</span>,<span style="color:#a6e22e">b</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">myFunction</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>)
+}
+</code></pre></div><p>然后查看其汇编代码。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">//为了方便查看，使用-N -l 参数，能阻止编译器对汇编代码的优化
+<span style="color:#75715e">#go tool compile -S -N -l main.go &gt; main.s</span>
+</code></pre></div><p>结果是这样的：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#e6db74">&#34;&#34;</span>.main STEXT size<span style="color:#f92672">=</span><span style="color:#ae81ff">95</span> args<span style="color:#f92672">=</span><span style="color:#ae81ff">0x0</span> locals<span style="color:#f92672">=</span><span style="color:#ae81ff">0x38</span>
+		<span style="color:#ae81ff">0x000f</span> <span style="color:#ae81ff">00015</span> (main.go:<span style="color:#ae81ff">7</span>)		SUBQ	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">56</span>, SP		<span style="color:#75715e">//在栈上分配56字节
+</span><span style="color:#75715e"></span>		<span style="color:#ae81ff">0x0013</span> <span style="color:#ae81ff">0001</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">7</span>)		MOVQ	BP, <span style="color:#ae81ff">48</span>(SP)	<span style="color:#75715e">//保存BP
+</span><span style="color:#75715e"></span>		<span style="color:#ae81ff">0x0018</span> <span style="color:#ae81ff">00024</span> (main.go:<span style="color:#ae81ff">7</span>)		LEAQ	<span style="color:#ae81ff">48</span>(SP), BP
+
+        <span style="color:#ae81ff">0x001d</span> <span style="color:#ae81ff">0002</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">8</span>)        MOVQ    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">1</span>, (SP)	<span style="color:#75715e">//第一个参数入栈
+</span><span style="color:#75715e"></span>        <span style="color:#ae81ff">0x0025</span> <span style="color:#ae81ff">00037</span> (main.go:<span style="color:#ae81ff">8</span>)        MOVQ    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">8</span>(SP)	<span style="color:#75715e">//第二个参数入栈
+</span><span style="color:#75715e"></span>        <span style="color:#ae81ff">0x002e</span> <span style="color:#ae81ff">00046</span> (main.go:<span style="color:#ae81ff">8</span>)        MOVQ    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">16</span>(SP)	<span style="color:#75715e">//第三个参数入栈
+</span><span style="color:#75715e"></span>        <span style="color:#ae81ff">0x0037</span> <span style="color:#ae81ff">00055</span> (main.go:<span style="color:#ae81ff">8</span>)        MOVQ    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">24</span>(SP)	<span style="color:#75715e">//第四个参数入栈
+</span><span style="color:#75715e"></span>        <span style="color:#ae81ff">0x0040</span> <span style="color:#ae81ff">00064</span> (main.go:<span style="color:#ae81ff">8</span>)        MOVQ    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">32</span>(SP)	<span style="color:#75715e">//第五个参数入栈
+</span><span style="color:#75715e"></span>        <span style="color:#ae81ff">0x0049</span> <span style="color:#ae81ff">00073</span> (main.go:<span style="color:#ae81ff">8</span>)        CALL    <span style="color:#e6db74">&#34;&#34;</span>.myFunction(SB)
+
+<span style="color:#e6db74">&#34;&#34;</span>.myFunction STEXT nosplit size<span style="color:#f92672">=</span><span style="color:#ae81ff">99</span> args<span style="color:#f92672">=</span><span style="color:#ae81ff">0x38</span> locals<span style="color:#f92672">=</span><span style="color:#ae81ff">0x18</span>
+        <span style="color:#ae81ff">0x000e</span> <span style="color:#ae81ff">00014</span> (main.go:<span style="color:#ae81ff">3</span>)	MOVQ	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">0</span>, <span style="color:#e6db74">&#34;&#34;</span>.<span style="color:#f92672">~</span>r5<span style="color:#f92672">+</span><span style="color:#ae81ff">72</span>(SP)
+        <span style="color:#ae81ff">0x0017</span> <span style="color:#ae81ff">00023</span> (main.go:<span style="color:#ae81ff">3</span>)	MOVQ	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">0</span>, <span style="color:#e6db74">&#34;&#34;</span>.<span style="color:#f92672">~</span>r6<span style="color:#f92672">+</span><span style="color:#ae81ff">80</span>(SP)
+        <span style="color:#ae81ff">0x0020</span> <span style="color:#ae81ff">00032</span> (main.go:<span style="color:#ae81ff">4</span>)	MOVQ	<span style="color:#e6db74">&#34;&#34;</span>.p1<span style="color:#f92672">+</span><span style="color:#ae81ff">32</span>(SP), AX
+        <span style="color:#ae81ff">0x0025</span> <span style="color:#ae81ff">00037</span> (main.go:<span style="color:#ae81ff">4</span>)	ADDQ	<span style="color:#e6db74">&#34;&#34;</span>.p2<span style="color:#f92672">+</span><span style="color:#ae81ff">40</span>(SP), AX
+        <span style="color:#ae81ff">0x002a</span> <span style="color:#ae81ff">00042</span> (main.go:<span style="color:#ae81ff">4</span>)	ADDQ	<span style="color:#e6db74">&#34;&#34;</span>.p3<span style="color:#f92672">+</span><span style="color:#ae81ff">48</span>(SP), AX
+        <span style="color:#ae81ff">0x002f</span> <span style="color:#ae81ff">00047</span> (main.go:<span style="color:#ae81ff">4</span>)	ADDQ	<span style="color:#e6db74">&#34;&#34;</span>.p4<span style="color:#f92672">+</span><span style="color:#ae81ff">56</span>(SP), AX
+        <span style="color:#ae81ff">0x0034</span> <span style="color:#ae81ff">00052</span> (main.go:<span style="color:#ae81ff">4</span>)	ADDQ	<span style="color:#e6db74">&#34;&#34;</span>.p5<span style="color:#f92672">+</span><span style="color:#ae81ff">64</span>(SP), AX
+        <span style="color:#ae81ff">0x004b</span> <span style="color:#ae81ff">00075</span> (main.go:<span style="color:#ae81ff">6</span>)	MOVQ	AX, <span style="color:#e6db74">&#34;&#34;</span>.<span style="color:#f92672">~</span>r5<span style="color:#f92672">+</span><span style="color:#ae81ff">72</span>(SP)
+        <span style="color:#ae81ff">0x0054</span> <span style="color:#ae81ff">000</span><span style="color:#ae81ff">84</span> (main.go:<span style="color:#ae81ff">6</span>)	MOVQ	AX, <span style="color:#e6db74">&#34;&#34;</span>.<span style="color:#f92672">~</span>r6<span style="color:#f92672">+</span><span style="color:#ae81ff">80</span>(SP)
+</code></pre></div><p>可以看到，在Golang中：</p>
+<p><strong>使用栈来传递参数</strong><br>
+栈是位于内存之中的，虽然有 CPU 中 L1、L2、L3的帮助，但平均每次访问性能仍然和寄存器没法比。所以 Golang 的函数调用开销肯定会比 C 语言要高。后面我们将用一个实验来进行量化的比较。</p>
+<p><strong>使用栈来返回数据</strong><br>
+不像 C 语言那样固定使用一个 eax 寄存器，Golang 是使用栈来返回值的。这就是为啥 Golang 可以返回多个值的根本原因。</p>
+<h1 id="最后性能开销对比">最后，性能开销对比</h1>
+<p>我们的测试方法简单粗暴，直接调用空函数 1 亿次，再统计计算平均耗时。</p>
+<p><strong>C函数编译运行测试：</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;  </span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">func</span>(<span style="color:#66d9ef">int</span> p){   
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+}  
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()  
+{  
+    <span style="color:#66d9ef">int</span> i;  
+    <span style="color:#66d9ef">for</span>(i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">100000000</span>; i<span style="color:#f92672">++</span>){  
+        func(<span style="color:#ae81ff">2</span>);  
+    }  
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;  
+}
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#75715e"># gcc main.c -o main</span>
+<span style="color:#75715e"># time ./main</span>
+</code></pre></div><p>第一次执行耗时大约是 0.339 s。</p>
+<p>但这个耗时中包含了两块。一块是函数调用开销，另外一块是 for 循环的开销(其它的代码调用因为只有 1 次，而函数调用和 for 循环都有 1 亿次，所以直接就可以忽略了)。</p>
+<p>所以我们得减去 for 循环的开销。接着我手工注释掉对函数的调用，只是空循环 100000000 次。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()  
+{  
+    <span style="color:#66d9ef">int</span> i;  
+    <span style="color:#66d9ef">for</span>(i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">100000000</span>; i<span style="color:#f92672">++</span>){  
+    <span style="color:#75715e">//    func(2);  
+</span><span style="color:#75715e"></span>    }  
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;  
+}
+
+</code></pre></div><p>这次总耗时是 0.314 s。</p>
+<p>这样就计算出平均每次函数调用耗时 = (0.339s - 0.314s) / 100000000 = 0.25ns</p>
+<p><strong>Golang函数编译运行</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">hello</span>(<span style="color:#a6e22e">a</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span> {
+	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">2</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>(){
+	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span><span style="color:#f92672">:=</span><span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span>&lt;<span style="color:#ae81ff">100000000</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+		<span style="color:#a6e22e">hello</span>(<span style="color:#ae81ff">1</span>)
+	}
+}
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#75715e"># go build -gcflags=&#34;-m -l&#34; main.go</span>
+</code></pre></div><p>同样采用上述方法测出平均每次函数调用耗时 = (0.302s - 0.056 s) / 100000000 = 2.46ns</p>
+<p>可见 Golang 的函数调用性能还是比 C 要差一些。但再给大家个参考一下 PHP 的数据，之前我测过 PHP7 每次函数调用开销大约在 50 ns 左右。所以 Golang 虽然比不上 C，但总的来说性能还是不错的。</p>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/k8s-deploy/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">我的应用程序新招了个全能的小秘书</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: 'post\/inside-golang\/function.md',
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

@@ -2,6 +2,9 @@
 title: "浅谈微服务"
 date: 2021-05-18T10:17:01+08:00
 draft: false
+categories:
+  - "架构技术"
+  
 #Comment
 gitment: true
 ---

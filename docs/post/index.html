@@ -46,14 +46,20 @@
 	</header><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+<<<<<<< HEAD
 			<a href="/post/arch/pprof/" rel="bookmark">
 			浅谈pprof
+=======
+			<a href="/post/inside-golang/function/" rel="bookmark">
+			Golang 函数和 C 函数深度对比
+>>>>>>> 199bc8878f8b13dc1e058cd95d619bac8b7d3846
 			</a>
 		</h2>
 		<div class="list__meta meta"><div class="meta__item-author meta__item">
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
+<<<<<<< HEAD
 	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-06-06T15:45:29&#43;08:00">2021-06-06</time></div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
@@ -71,6 +77,37 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	_ <span style="color:#f92672">=</span> http.ListenAndServe<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;localhost:6060&#34;</span>, nil<span style="color:#f92672">)</span>
 <span style="color:#f92672">}</span>
 </code></pre></div><p>需要注意的是，千万别让外网访问到 pprof，否则可能会导致出现安全问题。有兴趣的读者可以尝试通过 google 搜索「intitle:/debug/pprof/ inurl:/debug/pprof/」看看反面例子。</p>
+=======
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-26T17:25:49&#43;08:00">2021-05-26</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/golang%E5%8E%9F%E7%90%86/" rel="category">Golang原理</a>
+	</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		<p>无论是什么语言，函数都是最常被使用到的东西。</p>
+<p>我们对比一下 Golang 和 C 这两种语言的函数实现，进而我们能真正理解以下两个问题。</p>
+<ul>
+<li>为什么 C 语言只能有一个返回值，而 Golang 中可以返回多个？</li>
+<li>Golang 函数调用在性能上和 C 比有何差异？</li>
+</ul>
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
+			<a href="/post/arch/k8s-deploy/" rel="bookmark">
+			我的应用程序新招了个全能的小秘书
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-25T15:31:27&#43;08:00">2021-05-25</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
+	</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		<p>近一年，我的应用程序因为贴近用户需求被推上了热搜 😁 ，不过他也随之变得异常忙碌。来感受下老板和开发童鞋们的吐槽吧~~</p>
+>>>>>>> 199bc8878f8b13dc1e058cd95d619bac8b7d3846
 	</div>
 </article><article class="list__item post">
 	<header class="list__header">
@@ -83,7 +120,9 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-25T11:03:14&#43;08:00">2021-05-25</time></div></div>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-25T11:03:14&#43;08:00">2021-05-25</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
+	</span>
+</div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
 		<p>提到“容器”，大家应该都不陌生，不是什么特别新鲜的技术了，受众也越来越广了，但是会用就真的理解吗？以下几个相关问题你真的能做到了然于胸吗？</p>
@@ -105,7 +144,9 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-24T10:28:44&#43;08:00">2021-05-24</time></div></div>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-24T10:28:44&#43;08:00">2021-05-24</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
+	</span>
+</div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
 		<p>我用过很多消息系统，比如：简单的 <a href="https://redis.io/topics/streams-intro">Redis Streams</a>；高效的 <a href="https://kafka.apache.org/">Kafaka</a> 等等，不过自从我把编程语言切换到 Golang 以后，总觉得必须找个用 Golang 开发的消息系统才配得上门当户对，原本我已经和小家碧玉的 <a href="https://nsq.io/">NSQ</a> 厮守终生，不过当我认识了上流社会 <a href="https://landscape.cncf.io/">CNCF</a> 钦定的大家闺秀 <a href="https://nats.io/">NATS</a> 后，刹那间就仿佛徐志摩遇到了林徽因，扭头就给结发妻子写了休书。</p>
@@ -121,32 +162,20 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-18T10:17:01&#43;08:00">2021-05-18</time></div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>虽说<a href="https://martinfowler.com/articles/microservices.html">微服务</a>是一个老生常谈的话题，在 <a href="https://www.infoq.cn/topic/microservice">infoq</a> 或者 <a href="https://insights.thoughtworks.cn/tag/microservices/">thoughtworks</a> 上可以找到很多案例，不过可惜的是其中相当比例的案例是失败的案例，究其原因，除了<a href="https://microservices.io/index.html">技术门槛</a>之外，主要是因为很多人脱离了实际情况，只是为了微服务而微服务。本文通过一个例子带领大家从头到尾体验一下微服务的演化过程，不仅要做到知其然，更要做到知其所以然。</p>
-	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/about/" rel="bookmark">
-			关于我们
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-10T19:59:02&#43;08:00">2021-05-10</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9D%82%E8%B0%88/" rel="category">杂谈</a>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-18T10:17:01&#43;08:00">2021-05-18</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
 	</span>
 </div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
-		<p>大家好，我们是搜狗商业技术团队！</p>
+		<p>虽说<a href="https://martinfowler.com/articles/microservices.html">微服务</a>是一个老生常谈的话题，在 <a href="https://www.infoq.cn/topic/microservice">infoq</a> 或者 <a href="https://insights.thoughtworks.cn/tag/microservices/">thoughtworks</a> 上可以找到很多案例，不过可惜的是其中相当比例的案例是失败的案例，究其原因，除了<a href="https://microservices.io/index.html">技术门槛</a>之外，主要是因为很多人脱离了实际情况，只是为了微服务而微服务。本文通过一个例子带领大家从头到尾体验一下微服务的演化过程，不仅要做到知其然，更要做到知其所以然。</p>
 	</div>
 </article>
 </main>
 
+<div class="pagination">
+	<span class="pagination__item pagination__item--current">1/2</span>
+	<a class="pagination__item pagination__item--next btn" href="/post/page/2/">»</a>
+</div>
 
 			</div>
 			
@@ -164,8 +193,16 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<div class="widget__content">
 		<ul class="widget__list">
 			<li class="widget__item">
+				<a class="widget__link" href="/categories/golang%E5%8E%9F%E7%90%86/">Golang原理</a>&nbsp;
+				<span class="widget__counter widget__counter--bubble">1</span>
+				</li>
+			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a>&nbsp;
 				<span class="widget__counter widget__counter--bubble">1</span>
+				</li>
+			<li class="widget__item">
+				<a class="widget__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/">架构技术</a>&nbsp;
+				<span class="widget__counter widget__counter--bubble">4</span>
 				</li>
 		</ul>
 	</div>
@@ -174,11 +211,15 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+<<<<<<< HEAD
 			<li class="widget__item"><a class="widget__link" href="/post/arch/pprof/">浅谈pprof</a></li>
+=======
+			<li class="widget__item"><a class="widget__link" href="/post/inside-golang/function/">Golang 函数和 C 函数深度对比</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/arch/k8s-deploy/">我的应用程序新招了个全能的小秘书</a></li>
+>>>>>>> 199bc8878f8b13dc1e058cd95d619bac8b7d3846
 			<li class="widget__item"><a class="widget__link" href="/post/arch/container/">你真的理解容器吗？</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/nats/">浅谈NATS消息系统</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/microservice/">浅谈微服务</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/about/">关于我们</a></li>
 		</ul>
 	</div>
 </div>

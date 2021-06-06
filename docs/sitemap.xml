@@ -3,6 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+<<<<<<< HEAD
     <loc>https://high-server.github.io/post/</loc>
     <lastmod>2021-06-06T15:45:29+08:00</lastmod>
   </url>
@@ -18,6 +19,29 @@
   </url>
   
   <url>
+=======
+    <loc>https://high-server.github.io/categories/</loc>
+    <lastmod>2021-05-26T17:25:49+08:00</lastmod>
+  </url><url>
+    <loc>https://high-server.github.io/post/inside-golang/function/</loc>
+    <lastmod>2021-05-26T17:25:49+08:00</lastmod>
+  </url><url>
+    <loc>https://high-server.github.io/categories/golang%E5%8E%9F%E7%90%86/</loc>
+    <lastmod>2021-05-26T17:25:49+08:00</lastmod>
+  </url><url>
+    <loc>https://high-server.github.io/post/</loc>
+    <lastmod>2021-05-26T17:25:49+08:00</lastmod>
+  </url><url>
+    <loc>https://high-server.github.io/</loc>
+    <lastmod>2021-05-26T17:25:49+08:00</lastmod>
+  </url><url>
+    <loc>https://high-server.github.io/post/arch/k8s-deploy/</loc>
+    <lastmod>2021-05-25T15:31:27+08:00</lastmod>
+  </url><url>
+    <loc>https://high-server.github.io/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/</loc>
+    <lastmod>2021-05-25T15:31:27+08:00</lastmod>
+  </url><url>
+>>>>>>> 199bc8878f8b13dc1e058cd95d619bac8b7d3846
     <loc>https://high-server.github.io/post/arch/container/</loc>
     <lastmod>2021-05-25T11:03:14+08:00</lastmod>
   </url>
@@ -30,6 +54,7 @@
   <url>
     <loc>https://high-server.github.io/post/arch/microservice/</loc>
     <lastmod>2021-05-18T10:17:01+08:00</lastmod>
+<<<<<<< HEAD
   </url>
   
   <url>
@@ -38,6 +63,9 @@
   </url>
   
   <url>
+=======
+  </url><url>
+>>>>>>> 199bc8878f8b13dc1e058cd95d619bac8b7d3846
     <loc>https://high-server.github.io/post/about/</loc>
     <lastmod>2021-05-10T19:59:02+08:00</lastmod>
   </url>

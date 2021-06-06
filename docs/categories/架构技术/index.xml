@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>架构技术 on 架构技术漫谈</title>
+    <link>https://high-server.github.io/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/</link>
+    <description>Recent content in 架构技术 on 架构技术漫谈</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 25 May 2021 15:31:27 +0800</lastBuildDate><atom:link href="https://high-server.github.io/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>我的应用程序新招了个全能的小秘书</title>
+      <link>https://high-server.github.io/post/arch/k8s-deploy/</link>
+      <pubDate>Tue, 25 May 2021 15:31:27 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/k8s-deploy/</guid>
+      <description>&lt;p&gt;近一年，我的应用程序因为贴近用户需求被推上了热搜 😁 ，不过他也随之变得异常忙碌。来感受下老板和开发童鞋们的吐槽吧~~&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>你真的理解容器吗？</title>
+      <link>https://high-server.github.io/post/arch/container/</link>
+      <pubDate>Tue, 25 May 2021 11:03:14 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/container/</guid>
+      <description>&lt;p&gt;提到“容器”，大家应该都不陌生，不是什么特别新鲜的技术了，受众也越来越广了，但是会用就真的理解吗？以下几个相关问题你真的能做到了然于胸吗？&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;“容器”是怎么把自己隔离开的呐？&lt;/li&gt;
+&lt;li&gt;“容器”能使用宿主机的全部资源吗？&lt;/li&gt;
+&lt;li&gt;“容器”有自己的文件系统吗？&lt;/li&gt;
+&lt;li&gt;“容器”与虚拟机有什么区别？&lt;/li&gt;
+&lt;/ol&gt;</description>
+    </item>
+    
+    <item>
+      <title>浅谈NATS消息系统</title>
+      <link>https://high-server.github.io/post/arch/nats/</link>
+      <pubDate>Mon, 24 May 2021 10:28:44 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/nats/</guid>
+      <description>&lt;p&gt;我用过很多消息系统，比如：简单的 &lt;a href=&#34;https://redis.io/topics/streams-intro&#34;&gt;Redis Streams&lt;/a&gt;；高效的 &lt;a href=&#34;https://kafka.apache.org/&#34;&gt;Kafaka&lt;/a&gt; 等等，不过自从我把编程语言切换到 Golang 以后，总觉得必须找个用 Golang 开发的消息系统才配得上门当户对，原本我已经和小家碧玉的 &lt;a href=&#34;https://nsq.io/&#34;&gt;NSQ&lt;/a&gt; 厮守终生，不过当我认识了上流社会 &lt;a href=&#34;https://landscape.cncf.io/&#34;&gt;CNCF&lt;/a&gt; 钦定的大家闺秀 &lt;a href=&#34;https://nats.io/&#34;&gt;NATS&lt;/a&gt; 后，刹那间就仿佛徐志摩遇到了林徽因，扭头就给结发妻子写了休书。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>浅谈微服务</title>
+      <link>https://high-server.github.io/post/arch/microservice/</link>
+      <pubDate>Tue, 18 May 2021 10:17:01 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/microservice/</guid>
+      <description>&lt;p&gt;虽说&lt;a href=&#34;https://martinfowler.com/articles/microservices.html&#34;&gt;微服务&lt;/a&gt;是一个老生常谈的话题，在 &lt;a href=&#34;https://www.infoq.cn/topic/microservice&#34;&gt;infoq&lt;/a&gt; 或者 &lt;a href=&#34;https://insights.thoughtworks.cn/tag/microservices/&#34;&gt;thoughtworks&lt;/a&gt; 上可以找到很多案例，不过可惜的是其中相当比例的案例是失败的案例，究其原因，除了&lt;a href=&#34;https://microservices.io/index.html&#34;&gt;技术门槛&lt;/a&gt;之外，主要是因为很多人脱离了实际情况，只是为了微服务而微服务。本文通过一个例子带领大家从头到尾体验一下微服务的演化过程，不仅要做到知其然，更要做到知其所以然。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

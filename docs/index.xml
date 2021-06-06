@@ -6,6 +6,7 @@
     <description>Recent content on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+<<<<<<< HEAD
     <lastBuildDate>Sun, 06 Jun 2021 15:45:29 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>浅谈pprof</title>
@@ -27,6 +28,30 @@ func main&lt;span style=&#34;color:#f92672&#34;&gt;()&lt;/span&gt; &lt;span styl
 	_ &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; http.ListenAndServe&lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;localhost:6060&amp;#34;&lt;/span&gt;, nil&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
 &lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;需要注意的是，千万别让外网访问到 pprof，否则可能会导致出现安全问题。有兴趣的读者可以尝试通过 google 搜索「intitle:/debug/pprof/ inurl:/debug/pprof/」看看反面例子。&lt;/p&gt;</description>
+=======
+    <lastBuildDate>Wed, 26 May 2021 17:25:49 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Golang 函数和 C 函数深度对比</title>
+      <link>https://high-server.github.io/post/inside-golang/function/</link>
+      <pubDate>Wed, 26 May 2021 17:25:49 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/inside-golang/function/</guid>
+      <description>&lt;p&gt;无论是什么语言，函数都是最常被使用到的东西。&lt;/p&gt;
+&lt;p&gt;我们对比一下 Golang 和 C 这两种语言的函数实现，进而我们能真正理解以下两个问题。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;为什么 C 语言只能有一个返回值，而 Golang 中可以返回多个？&lt;/li&gt;
+&lt;li&gt;Golang 函数调用在性能上和 C 比有何差异？&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>我的应用程序新招了个全能的小秘书</title>
+      <link>https://high-server.github.io/post/arch/k8s-deploy/</link>
+      <pubDate>Tue, 25 May 2021 15:31:27 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/k8s-deploy/</guid>
+      <description>&lt;p&gt;近一年，我的应用程序因为贴近用户需求被推上了热搜 😁 ，不过他也随之变得异常忙碌。来感受下老板和开发童鞋们的吐槽吧~~&lt;/p&gt;</description>
+>>>>>>> 199bc8878f8b13dc1e058cd95d619bac8b7d3846
     </item>
     
     <item>
