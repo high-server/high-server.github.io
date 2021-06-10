@@ -6,7 +6,18 @@
     <description>Recent content on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 06 Jun 2021 15:45:29 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 10 Jun 2021 14:38:48 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>从iptables谈ServiceMesh流量拦截</title>
+      <link>https://high-server.github.io/post/arch/iptables/</link>
+      <pubDate>Thu, 10 Jun 2021 14:38:48 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/iptables/</guid>
+      <description>&lt;p&gt;最近研究学习 Kubernetes 和 ServiceMesh 过程中都看到了 &lt;strong&gt;iptables&lt;/strong&gt; 发挥重要作用独挡一面的场景。  &lt;br&gt;
+Kubernetes 中 iptables 作为 kube-proxy 里控制流量转发的核心模式，通过在目标 node 的 iptables 中增加一些自定义链对流经到该 node 的数据包做DNAT和SNAT操作以实现路由、负载均衡和地址转换。  &lt;br&gt;
+ServiceMesh 服务网格中 Istio 通过 init 容器（启动命令为istio-iptables）给 Sidecar 容器即 Envoy 代理做初始化，设置 iptables 端口转发，从而实现流量劫持&amp;amp;转发控制等服务治理相关。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>浅谈pprof</title>
       <link>https://high-server.github.io/post/arch/pprof/</link>
