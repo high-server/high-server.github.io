@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>实战CGO - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">实战CGO</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-07-03T15:01:55&#43;08:00">2021-07-03</time></div></div>
+		</header><div class="content post__content clearfix">
+			<p>某项目要集成 PDF 文件的 OCR 功能，不过由于此功能技术难度太大，网络上找不到靠谱的开源实现，最终不得不选择 <a href="https://www.abbyy.com/ocr-sdk/">ABBYY FineReader Engine</a> 的付费服务。可惜 ABBYY 只提供了 C++ 和 Java 两种编程语言的 SDK，而我们的项目采用的编程语言是 Golang，此时通常的集成方法是使用 C++ 或 Java 实现一个服务，然后在 Golang 项目里通过 RPC 调用服务，不过如此一来明显增加了系统的复杂度，好在 Golang 支持 CGO，让我们可以很方便的在 Golang 中使用 C 模块，本文总结了我在学习 CGO 过程中的心得体会。</p>
+<h2 id="hello-world">Hello World</h2>
+<p>让我们看看一个 CGO 版本的 Hello, world 大概长什么样：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#75715e">/*
+</span><span style="color:#75715e">#include &lt;stdio.h&gt;
+</span><span style="color:#75715e">
+</span><span style="color:#75715e">void say(const char *s) {
+</span><span style="color:#75715e">    puts(s);
+</span><span style="color:#75715e">}
+</span><span style="color:#75715e">*/</span>
+<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;C&#34;</span>
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+    <span style="color:#a6e22e">hello</span>()
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">hello</span>() {
+    <span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">CString</span>(<span style="color:#e6db74">&#34;Hello, World\n&#34;</span>)
+    <span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">say</span>(<span style="color:#a6e22e">s</span>)
+}
+</code></pre></div><p>如上所示，通过「import “C”」来激活 CGO，并且所有 C 语言相关的代码都以注释的形式放在此行之上，中间不允许有空行，这样我们就可以在 Golang 代码里使用 C 模块了，看上去很简单，不过代码里存在内存泄漏，让我们修改一下代码，使问题更明显一点：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#75715e">/*
+</span><span style="color:#75715e">#include &lt;stdio.h&gt;
+</span><span style="color:#75715e">
+</span><span style="color:#75715e">void say(const char *s) {
+</span><span style="color:#75715e">    puts(s);
+</span><span style="color:#75715e">}
+</span><span style="color:#75715e">*/</span>
+<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;C&#34;</span>
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+    <span style="color:#66d9ef">for</span> {
+        <span style="color:#a6e22e">hello</span>()
+    }
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">hello</span>() {
+    <span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">CString</span>(<span style="color:#e6db74">&#34;Hello, World\n&#34;</span>)
+    <span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">say</span>(<span style="color:#a6e22e">s</span>)
+}
+</code></pre></div><p>运行程序后，我们可以单独开一个命令行窗口，通过运行 top 命令来监控进程的内存变化，会发现在循环调用 C 模块之后，进程的内存占用不断增加，究其原因，是因为通过 C.CString 创建的变量，会在 C 语言层面上分配内存，而在 Golang 语言层面上是不会负责管理相关内存的，所以我们需要通过 C.free 手动释放相关内存：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#75715e">/*
+</span><span style="color:#75715e">#include &lt;stdio.h&gt;
+</span><span style="color:#75715e">#include &lt;stdlib.h&gt;
+</span><span style="color:#75715e">
+</span><span style="color:#75715e">void say(const char *s) {
+</span><span style="color:#75715e">    puts(s);
+</span><span style="color:#75715e">}
+</span><span style="color:#75715e">*/</span>
+<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;C&#34;</span>
+<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;unsafe&#34;</span>
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+    <span style="color:#66d9ef">for</span> {
+        <span style="color:#a6e22e">hello</span>()
+    }
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">hello</span>() {
+    <span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">CString</span>(<span style="color:#e6db74">&#34;Hello, World\n&#34;</span>)
+    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">free</span>(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#a6e22e">s</span>))
+    <span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">say</span>(<span style="color:#a6e22e">s</span>)
+}
+</code></pre></div><p>说明：代码中的 unsafe.Pointer 相当于 C 语言中的 void *。</p>
+<h2 id="in-action">In Action</h2>
+<p>有些读者看到这里可能会有疑问：虽然 CGO 让我们可以在 Golang 里使用 C，但是文章开头提到的 ABBYY 并没有 C 的 SDK，只有 C++ 的 SDK，那么 CGO 支持 C++ 么？答案是否定的，不过我们可以通过 C 来适配 C++。</p>
+<p>以 ABBYY 为例，假设它的安装目录是 /opt/ABBYY/FREngine12，并且通过 <a href="https://linux.die.net/man/8/ldconfig">ldconfig</a> 把 /opt/ABBYY/FREngine12/Bin 目录加入到动态链接库的查找目录：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; echo <span style="color:#e6db74">&#34;/opt/ABBYY/FREngine12/Bin&#34;</span> &gt; /etc/ld.so.conf.d/abbyy.conf
+shell&gt; ldconfig
+</code></pre></div><p>准备工作做好后使用 /opt/ABBYY/FREngine12/Samples/Hello 例子做代码范本：</p>
+<p>先编写 OCR.cpp 文件的内容，不用在意技术细节，我放这些代码只是为了备份：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;AbbyyException.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;BstrWrap.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;FREngineLoader.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;./OCR.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">using</span> <span style="color:#66d9ef">namespace</span> std;
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">load</span>() {
+    LoadFREngine();
+}
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">unload</span>() {
+    UnloadFREngine();
+}
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">process</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>inPath, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>outPath) {
+    string file <span style="color:#f92672">=</span> outPath;
+    string extension <span style="color:#f92672">=</span> file.substr(file.find_last_of(<span style="color:#e6db74">&#34;.&#34;</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+    FileExportFormatEnum format;
+
+    <span style="color:#66d9ef">if</span> (extension <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;pdf&#34;</span>) {
+        format <span style="color:#f92672">=</span> FEF_PDF;
+    } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (extension <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;doc&#34;</span> <span style="color:#f92672">||</span> extension <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;docx&#34;</span>) {
+        format <span style="color:#f92672">=</span> FEF_DOCX;
+    } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (extension <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;ppt&#34;</span> <span style="color:#f92672">||</span> extension <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;pptx&#34;</span>) {
+        format <span style="color:#f92672">=</span> FEF_PPTX;
+    } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (extension <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;xls&#34;</span> <span style="color:#f92672">||</span> extension <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;xlsx&#34;</span>) {
+        format <span style="color:#f92672">=</span> FEF_XLSX;
+    } <span style="color:#66d9ef">else</span> {
+        <span style="color:#66d9ef">return</span>;
+    }
+
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">wchar_t</span> <span style="color:#f92672">*</span>language <span style="color:#f92672">=</span> <span style="color:#e6db74">L</span><span style="color:#e6db74">&#34;ChinesePRC,ChineseTaiwan,English&#34;</span>;
+    CSafePtr frDocument <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+    CSafePtr documentProcessingParams;
+    CSafePtr pageProcessingParams;
+    CSafePtr recognizerParams;
+
+    <span style="color:#66d9ef">try</span> {
+        CheckResult(FREngine<span style="color:#f92672">-&gt;</span>CreateFRDocumentFromImage(CBstr(inPath), <span style="color:#ae81ff">0</span>, <span style="color:#f92672">&amp;</span>frDocument));
+        CheckResult(FREngine<span style="color:#f92672">-&gt;</span>CreateDocumentProcessingParams(<span style="color:#f92672">&amp;</span>documentProcessingParams));
+        CheckResult(documentProcessingParams<span style="color:#f92672">-&gt;</span>get_PageProcessingParams(<span style="color:#f92672">&amp;</span>pageProcessingParams));
+        CheckResult(pageProcessingParams<span style="color:#f92672">-&gt;</span>get_RecognizerParams(<span style="color:#f92672">&amp;</span>recognizerParams));
+        CheckResult(recognizerParams<span style="color:#f92672">-&gt;</span>SetPredefinedTextLanguage(CBstr(language)));
+        CheckResult(frDocument<span style="color:#f92672">-&gt;</span>Process(documentProcessingParams));
+        CheckResult(frDocument<span style="color:#f92672">-&gt;</span>Export(CBstr(outPath), format, <span style="color:#ae81ff">0</span>));
+    } <span style="color:#66d9ef">catch</span> (...) {
+        <span style="color:#66d9ef">return</span>;
+    }
+}
+</code></pre></div><p>再编写 OCR.h 文件的内容，要特别注意其中的「<a href="https://stackoverflow.com/questions/1041866/what-is-the-effect-of-extern-c-in-c">extern “C”</a>」，有了它，当编译的时候，就会把 C++ 中的方法名链接成 C 的风格，如此一来，CGO 才能识别它：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#75715e">#ifdef __cplusplus
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> {
+<span style="color:#75715e">#endif
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">load</span>();
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">unload</span>();
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">process</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>inPath, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>outPath);
+<span style="color:#75715e">#ifdef __cplusplus
+</span><span style="color:#75715e"></span>}
+<span style="color:#75715e">#endif
+</span></code></pre></div><p>最后编写 OCR.go 文件的内容，因为 C/C++ 代码量比较大，所以在使用 CGO 的时候直接把 C/C++ 代码写在注释中就显得不合适了，此时更合适的方法是链接库：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#75715e">// #cgo CFLAGS: -I .
+</span><span style="color:#75715e">// #cgo LDFLAGS: -L . -L /opt/ABBYY/FREngine12/Bin/ -lFREngine -lOCR -lstdc++
+</span><span style="color:#75715e">// #include &lt;stdlib.h&gt;
+</span><span style="color:#75715e">// #include &#34;OCR.h&#34;
+</span><span style="color:#75715e"></span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;C&#34;</span>
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;flag&#34;</span>
+	<span style="color:#e6db74">&#34;os&#34;</span>
+	<span style="color:#e6db74">&#34;unsafe&#34;</span>
+)
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">flag</span>.<span style="color:#a6e22e">Parse</span>()
+
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">flag</span>.<span style="color:#a6e22e">NArg</span>() <span style="color:#f92672">!=</span> <span style="color:#ae81ff">2</span> {
+		<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Exit</span>(<span style="color:#ae81ff">1</span>)
+	}
+
+	<span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">load</span>()
+	<span style="color:#a6e22e">inPath</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">CString</span>(<span style="color:#a6e22e">flag</span>.<span style="color:#a6e22e">Arg</span>(<span style="color:#ae81ff">0</span>))
+	<span style="color:#a6e22e">outPath</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">CString</span>(<span style="color:#a6e22e">flag</span>.<span style="color:#a6e22e">Arg</span>(<span style="color:#ae81ff">1</span>))
+
+	<span style="color:#66d9ef">defer</span> <span style="color:#66d9ef">func</span>() {
+		<span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">unload</span>()
+		<span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">free</span>(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#a6e22e">inPath</span>))
+		<span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">free</span>(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#a6e22e">outPath</span>))
+	}()
+
+	<span style="color:#a6e22e">C</span>.<span style="color:#a6e22e">process</span>(<span style="color:#a6e22e">inPath</span>, <span style="color:#a6e22e">outPath</span>)
+}
+</code></pre></div><p>假设目标文件都已经就绪，那么让我们分别看看如何构建静态链接库和动态链接库：</p>
+<p>先看静态链接库，只要通过如下 ar 命令即可，在最终编译程序的时候，静态链接库会被编译到程序里，所以运行时不存在依赖问题，当然代价就是文件尺寸相对较大：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; ar -r libOCR.a *.o
+</code></pre></div><p>再看动态链接库，只要通过如下 gcc 命令即可，和静态链接库相比，虽然它运行时存在依赖问题，但是它生成的文件尺寸相对较小，不过需要提醒的是，在之前编译目标文件的时候，需要在 CFLAGS 或 CXXFLAGS 参数中需要加入 -fpic 或者 -fPIC 选项，以便实现地址无关，至于 -fpic 和 -fPIC 的区别，可以参考 <a href="https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html">Shared Libraries</a>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; gcc -shared -o libOCR.so *.o
+shell&gt; cp libOCR.so /opt/ABBYY/FREngine12/Bin/
+</code></pre></div><p>动态链接库还有一个有点是更新方便，如果多个程序依赖同一个动态链接库的时候，那么当动态链接库有问题的时候，直接更新它即可，相反如果多个程序依赖同一个静态链接库，那么当静态链接库有问题的时候，你不得不重新编译每一个程序。不过动态链接库的依赖关系本身很容易出问题，下图是我的 OCR 程序依赖关系，有点复杂啊：</p>
+<p><img src="/img/cgo/ld.png" alt="动态链接"></p>
+<p>本文仅是 CGO 的入门笔记，想进一步了解的话，推荐阅读「<a href="https://chai2010.cn/advanced-go-programming-book/ch2-cgo/readme.html">CGO 编程</a>」，收摊儿。</p>
+
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/iptables/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">从iptables谈ServiceMesh流量拦截</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: 'post\/arch\/cgo.md',
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

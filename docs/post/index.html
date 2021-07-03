@@ -46,6 +46,44 @@
 	</header><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/arch/cgo/" rel="bookmark">
+			实战CGO
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-07-03T15:01:55&#43;08:00">2021-07-03</time></div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		某项目要集成 PDF 文件的 OCR 功能，不过由于此功能技术难度太大，网络上找不到靠谱的开源实现，最终不得不选择 ABBYY FineReader Engine 的付费服务。可惜 ABBYY 只提供了 C++ 和 Java 两种编程语言的 SDK，而我们的项目采用的编程语言是 Golang，此时通常的集成方法是使用 C++ 或 Java 实现一个服务，然后在 Golang 项目里通过 RPC 调用服务，不过如此一来明显增加了系统的复杂度，好在 Golang 支持 CGO，让我们可以很方便的在 Golang 中使用 C 模块，本文总结了我在学习 CGO 过程中的心得体会。
+Hello World 让我们看看一个 CGO 版本的 Hello, world 大概长什么样：
+package main /* #include &lt;stdio.h&gt; void say(const char *s) { puts(s); } */ import &#34;C&#34; func main() { hello() } func hello() { s := C.CString(&#34;Hello, World\n&#34;) C.say(s) } 如上所示，通过「import “C”」来激活 CGO，并且所有 C 语言相关的代码都以注释的形式放在此行之上，中间不允许有空行，这样我们就可以在 Golang 代码里使用 C 模块了，看上去很简单，不过代码里存在内存泄漏，让我们修改一下代码，使问题更明显一点：
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
+			<a href="/post/arch/iptables/" rel="bookmark">
+			从iptables谈ServiceMesh流量拦截
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-06-10T14:38:48&#43;08:00">2021-06-10</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
+	</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		<p>最近研究学习 Kubernetes 和 ServiceMesh 过程中都看到了 <strong>iptables</strong> 发挥重要作用独挡一面的场景。  <br>
+Kubernetes 中 iptables 作为 kube-proxy 里控制流量转发的核心模式，通过在目标 node 的 iptables 中增加一些自定义链对流经到该 node 的数据包做DNAT和SNAT操作以实现路由、负载均衡和地址转换。  <br>
+ServiceMesh 服务网格中 Istio 通过 init 容器（启动命令为istio-iptables）给 Sidecar 容器即 Envoy 代理做初始化，设置 iptables 端口转发，从而实现流量劫持&amp;转发控制等服务治理相关。</p>
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/pprof/" rel="bookmark">
 			浅谈pprof
 			</a>
@@ -113,48 +151,6 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<div class="content list__excerpt post__content clearfix">
 		<p>近一年，我的应用程序因为贴近用户需求被推上了热搜 😁 ，不过他也随之变得异常忙碌。来感受下老板和开发童鞋们的吐槽吧~~</p>
 	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/container/" rel="bookmark">
-			你真的理解容器吗？
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-25T11:03:14&#43;08:00">2021-05-25</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
-	</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>提到“容器”，大家应该都不陌生，不是什么特别新鲜的技术了，受众也越来越广了，但是会用就真的理解吗？以下几个相关问题你真的能做到了然于胸吗？</p>
-<ol>
-<li>“容器”是怎么把自己隔离开的呐？</li>
-<li>“容器”能使用宿主机的全部资源吗？</li>
-<li>“容器”有自己的文件系统吗？</li>
-<li>“容器”与虚拟机有什么区别？</li>
-</ol>
-	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/nats/" rel="bookmark">
-			浅谈NATS消息系统
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-24T10:28:44&#43;08:00">2021-05-24</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
-	</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>我用过很多消息系统，比如：简单的 <a href="https://redis.io/topics/streams-intro">Redis Streams</a>；高效的 <a href="https://kafka.apache.org/">Kafaka</a> 等等，不过自从我把编程语言切换到 Golang 以后，总觉得必须找个用 Golang 开发的消息系统才配得上门当户对，原本我已经和小家碧玉的 <a href="https://nsq.io/">NSQ</a> 厮守终生，不过当我认识了上流社会 <a href="https://landscape.cncf.io/">CNCF</a> 钦定的大家闺秀 <a href="https://nats.io/">NATS</a> 后，刹那间就仿佛徐志摩遇到了林徽因，扭头就给结发妻子写了休书。</p>
-	</div>
 </article>
 </main>
 
@@ -188,7 +184,7 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/">架构技术</a>&nbsp;
-				<span class="widget__counter widget__counter--bubble">4</span>
+				<span class="widget__counter widget__counter--bubble">5</span>
 				</li>
 		</ul>
 	</div>
@@ -197,11 +193,11 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/cgo/">实战CGO</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/arch/iptables/">从iptables谈ServiceMesh流量拦截</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/pprof/">浅谈pprof</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/inside-golang/function/">Golang 函数和 C 函数深度对比</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/k8s-deploy/">我的应用程序新招了个全能的小秘书</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/container/">你真的理解容器吗？</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/nats/">浅谈NATS消息系统</a></li>
 		</ul>
 	</div>
 </div>

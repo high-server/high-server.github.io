@@ -6,7 +6,18 @@
     <description>Recent content on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 10 Jun 2021 14:38:48 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 03 Jul 2021 15:01:55 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>实战CGO</title>
+      <link>https://high-server.github.io/post/arch/cgo/</link>
+      <pubDate>Sat, 03 Jul 2021 15:01:55 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/cgo/</guid>
+      <description>某项目要集成 PDF 文件的 OCR 功能，不过由于此功能技术难度太大，网络上找不到靠谱的开源实现，最终不得不选择 ABBYY FineReader Engine 的付费服务。可惜 ABBYY 只提供了 C++ 和 Java 两种编程语言的 SDK，而我们的项目采用的编程语言是 Golang，此时通常的集成方法是使用 C++ 或 Java 实现一个服务，然后在 Golang 项目里通过 RPC 调用服务，不过如此一来明显增加了系统的复杂度，好在 Golang 支持 CGO，让我们可以很方便的在 Golang 中使用 C 模块，本文总结了我在学习 CGO 过程中的心得体会。
+Hello World 让我们看看一个 CGO 版本的 Hello, world 大概长什么样：
+package main /* #include &amp;lt;stdio.h&amp;gt; void say(const char *s) { puts(s); } */ import &amp;#34;C&amp;#34; func main() { hello() } func hello() { s := C.CString(&amp;#34;Hello, World\n&amp;#34;) C.say(s) } 如上所示，通过「import “C”」来激活 CGO，并且所有 C 语言相关的代码都以注释的形式放在此行之上，中间不允许有空行，这样我们就可以在 Golang 代码里使用 C 模块了，看上去很简单，不过代码里存在内存泄漏，让我们修改一下代码，使问题更明显一点：</description>
+    </item>
+    
     <item>
       <title>从iptables谈ServiceMesh流量拦截</title>
       <link>https://high-server.github.io/post/arch/iptables/</link>
