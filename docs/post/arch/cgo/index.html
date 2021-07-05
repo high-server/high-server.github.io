@@ -229,7 +229,6 @@ shell&gt; cp libOCR.so /opt/ABBYY/FREngine12/Bin/
 </code></pre></div><p>动态链接库还有一个有点是更新方便，如果多个程序依赖同一个动态链接库的时候，那么当动态链接库有问题的时候，直接更新它即可，相反如果多个程序依赖同一个静态链接库，那么当静态链接库有问题的时候，你不得不重新编译每一个程序。不过动态链接库的依赖关系本身很容易出问题，下图是我的 OCR 程序依赖关系，有点复杂啊：</p>
 <p><img src="/img/cgo/ld.png" alt="动态链接"></p>
 <p>本文仅是 CGO 的入门笔记，想进一步了解的话，推荐阅读「<a href="https://chai2010.cn/advanced-go-programming-book/ch2-cgo/readme.html">CGO 编程</a>」，收摊儿。</p>
-
 		</div>
 	</article>
 </main>
