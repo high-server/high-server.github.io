@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Golang类型转换 二 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Golang类型转换 二</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-07-13T15:30:41&#43;08:00">2021-07-13</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/golang%E7%B1%BB%E5%9E%8B/" rel="category">Golang类型</a>
+	</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>strconv拾遗</p>
+<p>上次学习了strconv包里的Atoi/Itoa，这次解决一下包里剩下的类型转换</p>
+<p>strconv包可以大致分成string/数字型转换，rune/sting转换。  常用的string/数字型转换又可以分三大类，Parse/Format/Append，简单理解就是数字型解析成字符串、数字型格式化成字符串和数字型拼接三种方法</p>
+<h3 id="parse">Parse</h3>
+<p>Parse系列函数</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:center">输入</th>
+<th style="text-align:right">输出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ParseBool</td>
+<td style="text-align:center">s string</td>
+<td style="text-align:right">bool,error</td>
+</tr>
+<tr>
+<td style="text-align:left">ParseInt</td>
+<td style="text-align:center">s string, 基数 int, 位数 int</td>
+<td style="text-align:right">int64,error</td>
+</tr>
+<tr>
+<td style="text-align:left">ParseUint</td>
+<td style="text-align:center">s string, 基数 int, 位数 int</td>
+<td style="text-align:right">int64,error</td>
+</tr>
+<tr>
+<td style="text-align:left">ParseFloat</td>
+<td style="text-align:center">s string, 位数 int</td>
+<td style="text-align:right">float64, error</td>
+</tr>
+<tr>
+<td style="text-align:left">ParseComplex</td>
+<td style="text-align:center">s string, 位数 int</td>
+<td style="text-align:right">complex128, error</td>
+</tr>
+</tbody>
+</table>
+<p>其中ParseInt()/ParseUint()在<a href="/post/inside-golang/strconv1/">类型转换一</a>中有介绍过主要流程，其他流程大同小异。</p>
+<h4 id="parsebool">ParseBool</h4>
+<p>将字符串转换成布尔类型，因为bool结果只有两个，需要转换的目标也有限，所以这个函数超简单，直接枚举长的像bool型的字符串，对应到bool结果上。不过“t”/&ldquo;f&quot;也能进行映射成true/false 是第一次见。</p>
+<pre><code>func ParseBool(str string) (bool, error) {
+	switch str {
+	case &quot;1&quot;, &quot;t&quot;, &quot;T&quot;, &quot;true&quot;, &quot;TRUE&quot;, &quot;True&quot;:
+		return true, nil
+	case &quot;0&quot;, &quot;f&quot;, &quot;F&quot;, &quot;false&quot;, &quot;FALSE&quot;, &quot;False&quot;:
+		return false, nil
+	}
+	return false, syntaxError(&quot;ParseBool&quot;, str)
+}
+</code></pre><h4 id="parsefloat">ParseFloat</h4>
+<p>ParseFloat稍微复杂点，不过也是一样的套路：检查系统位数-&gt;检查极限字符-&gt;拆分字符串-&gt;遍历字符串<br>
+字符串“1.1”大致流程图<br>
+<img src="/img/strconv1/strconvFloat1" alt="字符串“1.1”大致流程图"><br>
+ParseFloat首先选择32/64位操作，32位转换和64位转换差别不大。以64位为例，具体使用内部函数atof64();<br>
+atof64()里面有三个重要函数，分别是special()名如其功能，就是检查是否存在特殊情况比如无穷或非数，但它只能识别infinity/inf/nan;<br>
+readFloat()将字符串拆解成mantissa uint64 尾数数, exp int指, neg 是否负数, trunc 是否溢出, hex bool是否十六进制, i int 占用字节数, ok bool 转换是否成功。有了这些后面就可以直接处理了。<br>
+如果经过readFloat拆解是十六进制，则使用atofHex()
+如果不是就可能使用atof64exact()和eiselLemire64算法，对于‘1.1’ atof64exact()就够了，atof64exact()也不复杂使用float64对尾数进行转换，对指数进行处理再与尾数相乘即可。</p>
+<p>顺便看下16进制浮点数如何转换10进制浮点的，比如‘0x1a.2p1’ 0x是16进制标识，1a.2是尾数，p1就是e1。先将1a.2转换成二进制11010.001 指数是1小数点就向右移一位110100.01，再将2进制转换成10进制，110100=&gt;52 .01 =&gt;.25 52.25 atofHex()其实就是做的类似事情（ParseFloat()对16进制处理时候在readFloat()对p做了单独识别，而且p是判断16进制浮点数的条件。）​</p>
+<pre><code>    v := &quot;1.1&quot;
+	if s, err := strconv.ParseFloat(v, 32); err == nil {
+		fmt.Printf(&quot;%T, %v\n&quot;, s, s)
+	}
+	//float64, 1.100000023841858  #ParseFloat输出是float64所以按32位处理会影响精度
+	if s, err := strconv.ParseFloat(v, 64); err == nil {
+		fmt.Printf(&quot;%T, %v\n&quot;, s, s)
+	}
+    //float64, 1.1
+     v := &quot;0xD.2p1&quot;
+    if s, err := strconv.ParseFloat(v, 64); err == nil {
+		fmt.Print(s)
+	}
+    //26.25
+</code></pre><h4 id="parsecomplex">ParseComplex</h4>
+<p>ParseXXX系列还有一个复数转换，复数不怎么用，常见用在几何或者物理方面。好在ParseComplex不复杂，基本就是parseFloatPrefix处理字符串,也就是ParseFloat()执行两次
+。
+ParseComplex返回complex128的复数，需要注意是ParseComplex(s string, bitSize int)  bitSize是complex的位数是64/128，函数默认是采用parseFloatPrefix(s,64)处理也就是atof64(s)，所以处理complex64一定要指定bitSize对应目标位数，不然处理浮点型实虚数时会有精度缺失问题</p>
+<pre><code>    v := &quot;1.1+1i&quot;
+	c1 ,_:= strconv.ParseComplex(v, 128)
+	fmt.Print(c1)
+	//(1.1+1i)
+
+	c2 ,_:= strconv.ParseComplex(v, 64)
+	fmt.Print(c2)
+	//(1.100000023841858+1i)
+</code></pre><h3 id="format">Format</h3>
+<p>strconv包里还有另一类函数，FormatXX 将数字转换成字符串</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:center">输入</th>
+<th style="text-align:right">输出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">FormatBool</td>
+<td style="text-align:center">b bool</td>
+<td style="text-align:right">string</td>
+</tr>
+<tr>
+<td style="text-align:left">FormatInt</td>
+<td style="text-align:center">i int64, 基数 int</td>
+<td style="text-align:right">string</td>
+</tr>
+<tr>
+<td style="text-align:left">FormatUint</td>
+<td style="text-align:center">i uint64,基数 int</td>
+<td style="text-align:right">string</td>
+</tr>
+<tr>
+<td style="text-align:left">FormatFloat</td>
+<td style="text-align:center">f float64, fmt byte, prec, bitSize int</td>
+<td style="text-align:right">string</td>
+</tr>
+<tr>
+<td style="text-align:left">FormatComplex</td>
+<td style="text-align:center">c complex128, fmt byte, prec, bitSize int</td>
+<td style="text-align:right">string</td>
+</tr>
+</tbody>
+</table>
+<p>FormatBool()很简单，就是直接返回“true/false”字符串；</p>
+<pre><code>func FormatBool(b bool) string {
+	if b {
+		return &quot;true&quot;
+	}
+	return &quot;false&quot;
+}
+
+</code></pre><p>FormatInt()和FormatUint()上次也学习过了<a href="/post/inside-golang/strconv1/">Atoi</a></p>
+<h4 id="formatfloat">FormatFloat</h4>
+<p>FormatFloat(),需要四个参数f float64, fmt byte 格式参数(fmt必须是byte，所以用单引号), prec 小数保留位数(如-1是全保留), bitSize int基数<br>
+fmt可供选择：</p>
+<pre><code>// The format fmt is one of
+// 'b' (-ddddp±ddd, a binary exponent), 二进制表达式
+// 'e' (-d.dddde±dd, a decimal exponent),   十进制表达式
+// 'E' (-d.ddddE±dd, a decimal exponent),
+// 'f' (-ddd.dddd, no exponent),    普通的浮点表达式
+// 'g' ('e' for large exponents, 'f' otherwise),    大数情况使用的标识
+// 'G' ('E' for large exponents, 'f' otherwise),
+// 'x' (-0xd.ddddp±ddd, a hexadecimal fraction and binary exponent), or 十六进制表达式
+// 'X' (-0Xd.ddddP±ddd, a hexadecimal fraction and binary exponent).
+</code></pre><p>FormatFloat使用内部函数genericFtoa() ，genericFtoa()做的事情就是根据参数计算出原始float的十进制表达式，fmt是格式参数，指定计数格式，并且这个参数直接取决后续计算过程。
+精度参数prec小数点位置（如果是-1默认全部长度），而且这时候使用Grisu3算法计算浮点数，据说是普通精度算法的四倍，具体如何计算暂时没有了解。
+如果指定了精度长度就用普通的精度算法计算。篇幅限制就不展开genericFtoa()函数；<br>
+FormatComplex()和ParseComplex()一样，相当于执行两次FormatFloat()</p>
+<pre><code>	var v float64
+	v = 3.1415926535
+
+	s64 := strconv.FormatFloat(v, 'E', 2, 64)
+	fmt.Printf(&quot;%T, %v\n&quot;, s64, s64)
+	//string, 3.14E+00
+	
+	v:= (1.1+1i)
+	fmt.Print(strconv.FormatComplex(v,'f',-1,64))
+	//(1.1+1i)
+</code></pre><h4 id="append">Append</h4>
+<p>最后一类AppendXX函数，将数字类型进行拼接，需要注意不是计算，最终输出数组。因为最终拼接结果是字符串数组，所以拼接前需要和FormatXX一致的转换过程，如AppendFloat()底层处理逻辑就与FormatFloat()是相同逻辑</p>
+<h4 id="总结">总结</h4>
+<ol>
+<li>strconv包有三类函数 ParseXX 将字符串转换成数字类型； FormatXX 将数字类型转换成字符串 ；AppendXX 数字类型的拼接函数。这三类函数解决常见转换问题；</li>
+<li>精度问题 strconv转换函数大多默认返回float64，会导致输入float32的结果精度失真，使用前应注意；</li>
+<li>strconv还有处理rune/ASCII/图形符号之间的转换QuoteXX系列，以及rune/图形判断函数，逻辑也都不复杂，可以直接使用；</li>
+</ol>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/cgo/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">实战CGO</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: 'post\/inside-golang\/strconv2.md',
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

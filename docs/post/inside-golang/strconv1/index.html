@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Golang类型转换 一 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Golang类型转换 一</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-06-01T16:08:39&#43;08:00">2021-06-01</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/golang%E7%B1%BB%E5%9E%8B/" rel="category">Golang类型</a>
+	</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>Atoi/Itoa函数实现</p>
+<h2 id="常用类型转换">常用类型转换</h2>
+<p>基于工作中对golang数据类型使用的总结。在长期使用PHP过程中对数据类型的感觉就是“PHP眼里什么是数据类型？不存在的！万物皆可划等号”从这点来讲PHP的确是世上最好的语言。弱类型对开发者使用有着很大的便利，但也存在一定风险，比如类型操作不统一会在迭代过程中被覆盖，造成精度缺失甚至程序崩溃的问题。<br>
+golang作为强类型语言，在初用golang时，类型操作上会遇到过不少问题，日常使用中整理如下内容。<br>
+本人Go语言小学生，不足之处欢迎各路大神指正。</p>
+<h3 id="第一跤">第一跤</h3>
+<p>一个美丽的清晨，开始了第一个Go线上业务的开发。简单的需求，从数据库取出时间戳与比当前时间比对。<br>
+大概这个样子，原始数库时间戳字段直接被定义成int(php嘛)，直接上手比较，没有意外，Xcode贴心的小浪线出来了，编译不通过。</p>
+<pre><code>func main() {
+	var a int
+	a = 1621251016
+	fmt.Print(a &gt; time.Now().Unix())
+}
+
+//invalid operation: a &gt; time.Now().Unix() (mismatched types int and int64)
+</code></pre><p>心头一紧，都是整数型为啥不行。打开golang.org/pkg/time包……  func (t Time) Unix() int64。好吧，对于php就算是string也可以自动转换和int型进行比较。<br>
+但是Go为什么不行呢，查询文档如下解释。</p>
+<pre><code>[@builtin]# go doc builtin.int
+package builtin // import &quot;builtin&quot;
+
+type int int
+    int is a signed integer type that is at least 32 bits in size. It is a
+    distinct type, however, and not an alias for, say, int32.
+
+func cap(v Type) int
+func copy(dst, src []Type) int
+func len(v Type) int
+[@builtin]# go doc builtin.int64
+package builtin // import &quot;builtin&quot;
+
+type int64 int64
+    int64 is the set of all signed 64-bit integers. Range: -9223372036854775808
+    through 9223372036854775807.
+</code></pre><p>很严格，int至少32位，也就是所在系统位数32/64，特意强调“distinct”特殊的类型，不等于int32/int64的别名！<br>
+第一次类型操作就这么刺激，Go在整数型之间都不会自动转换可以想象其他类型间转换都需要明确定义和指定操作。</p>
+<h3 id="常用数据类型转换">常用数据类型转换</h3>
+<h4 id="atoi">AtoI</h4>
+<p>字符串与整数类型转换
+最常用的数据类型转换可能就是string与int互转，Go提供了strconv包解决，Atoi和Itoa方法（ascii to integer/integer to ascii）<br>
+转换前，回顾下常用进制表示，采用前缀区分：</p>
+<pre><code>2进制 0b1010...  
+8进制 0o1234.../01234...  
+16进制 0x12A...  
+</code></pre><p>Atoi(s string) 对字符串转换过程中核心函数是ParseUint()，Atoi()相当于使用ParseInt()对十进制字符转换。十进制转换过程中只需要对字符串数组进行遍历，并按位乘上基数，最后补全符号即可。但是对于2/8/16进制转换就需要ParseInt()处理了。</p>
+<pre><code>//十进制
+func Atoi(s string) (int, error) {
+    ...
+        n := 0
+		for _, ch := range []byte(s) {
+			ch -= '0'
+			if ch &gt; 9 {
+				return 0, &amp;NumError{fnAtoi, s0, ErrSyntax}
+			}
+			n = n*10 + int(ch)
+		}
+		if s0[0] == '-' {
+			n = -n
+		}
+    ...
+}
+</code></pre><p>ParseInt()实质上是对转换函数做预处理和结果校验。Atoi()和ParseInt()都会对字符串进行切片，剔除“+/-”符号后交给ParseUint()处理，ParseUint()会根据进制前缀检查字符所属进制。剩下的就根据各自进制特点计算各位整型值并乘上基数，再相加。比如16进制字符串转换成十进制数值。<br>
+如果超出进制范围，则直接返回最大值和error信息。</p>
+<pre><code>func ParseUint(s string, base int, bitSize int) (uint64, error) {
+    ......
+    for _, c := range []byte(s) {
+		var d byte
+		switch {
+		case c == '_' &amp;&amp; base0:
+			underscores = true
+			continue
+		case '0' &lt;= c &amp;&amp; c &lt;= '9':
+			d = c - '0'
+		case 'a' &lt;= lower(c) &amp;&amp; lower(c) &lt;= 'z':
+			d = lower(c) - 'a' + 10
+		default:
+			return 0, syntaxError(fnParseUint, s0)
+		}
+
+		if d &gt;= byte(base) {
+			return 0, syntaxError(fnParseUint, s0)
+		}
+
+		if n &gt;= cutoff {
+			// n*base overflows
+			return maxVal, rangeError(fnParseUint, s0)
+		}
+		n *= uint64(base)
+
+		n1 := n + uint64(d)
+		if n1 &lt; n || n1 &gt; maxVal {
+			// n+v overflows
+			return maxVal, rangeError(fnParseUint, s0)
+		}
+		n = n1
+	}
+    ......
+}
+</code></pre><p><img src="/img/strconv1/atoib.png" alt="Atoi主要流程图"></p>
+<p>ParseUint()里最后用到underscoreOK() 对下划线检查，很有意思，必须是在数字中间，而且是相同进制的数字字符，不能连续使用下划线。查了一下数字中间下划线只是为了增加可读性，没有什么特殊含义。<br>
+但是需要注意base参数需要设置为0，而且bitSize要设置正确，不然溢出则返回最大值。</p>
+<pre><code>func main() {
+	var b string
+	b = &quot;12345_12345&quot;
+	s, _ := strconv.ParseUint(b, 0, 16)
+	fmt.Print(s, math.MaxUint16)
+}
+// 65535 65535
+</code></pre><h4 id="itoa">Itoa</h4>
+<p>int型与字符串类型转换<br>
+Itoa()直接使用FormatInt()<br>
+其中对10进制0-99之间的字符串转换，直接在枚举常量digits和smallsString字符串中用截取出来。</p>
+<pre><code>const digits = &quot;0123456789abcdefghijklmnopqrstuvwxyz&quot;
+const smallsString = 
+    &quot;00010203040506070809&quot; +
+	&quot;10111213141516171819&quot; +
+	&quot;20212223242526272829&quot; +
+	&quot;30313233343536373839&quot; +
+	&quot;40414243444546474849&quot; +
+	&quot;50515253545556575859&quot; +
+	&quot;60616263646566676869&quot; +
+	&quot;70717273747576777879&quot; +
+	&quot;80818283848586878889&quot; +
+	&quot;90919293949596979899&quot;
+// 0-99
+func small(i int) string {
+	if i &lt; 10 {
+		return digits[i : i+1]
+	}
+	return smallsString[i*2 : i*2+2]
+}
+
+</code></pre><p>对于其他情况采用formatBits()解决，Itoa()直接将参数转化成int64，在做计算截取。通过smallsString 200以内的枚举数字字符串就可以快速映射整数型对应的字符串。</p>
+<pre><code>func formatBits(dst []byte, u uint64, base int, neg, append_ bool) (d []byte, s string) {
+    ......
+    for us &gt;= 100 {
+			is := us % 100 * 2
+			us /= 100
+			i -= 2
+			a[i+1] = smallsString[is+1]
+			a[i+0] = smallsString[is+0]
+		}
+
+		// us &lt; 100
+		is := us * 2
+		i--
+		a[i] = smallsString[is+1]
+		if us &gt;= 10 {
+			i--
+			a[i] = smallsString[is]
+		}
+    ......
+}
+</code></pre><p><img src="/img/strconv1/Iotab.png" alt="Itoa主要流程图"></p>
+<p>如图：计算偏移时打印得到51/54 对着smallsString数了半天 第127个元素怎么就是51呢？?不是3！ 看了看smallsString 又看了看fmt.Print，默默的加上了string(smallsString[127]) = 3</p>
+<pre><code>i -= 2
+a[i+1] = smallsString[127] 
+//fmt.Print(smallsString[127]) = 51 
+a[i+0] = smallsString[126] 
+//fmt.Print(smallsString[126]) = 54
+</code></pre><h3 id="总结">总结</h3>
+<ol>
+<li>Go 语言是强类型语言操作类型时需要注意转换，并且确保转换精度准确；</li>
+<li>字符串与整数型间转换都以int64/uint64位为标准输入输出；</li>
+<li>Atoi/Itoa设计并不复杂，作为基础函数学习是很好的例子。</li>
+<li>数据类型转换不仅限于字符整数，后续还会整理unsafe/error/复合类型的转换和操作。</li>
+</ol>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/inside-golang/function/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">Golang 函数和 C 函数深度对比</p>
+		</a>
+	</div>
+	<div class="pager__item pager__item--next">
+		<a class="pager__link" href="/post/arch/pprof/" rel="next">
+			<span class="pager__subtitle">Next&thinsp;»</span>
+			<p class="pager__title">浅谈pprof</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: 'post\/inside-golang\/strconv1.md',
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

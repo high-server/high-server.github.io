@@ -6,7 +6,16 @@
     <description>Recent content on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 03 Jul 2021 15:01:55 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 13 Jul 2021 15:30:41 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Golang类型转换 二</title>
+      <link>https://high-server.github.io/post/inside-golang/strconv2/</link>
+      <pubDate>Tue, 13 Jul 2021 15:30:41 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/inside-golang/strconv2/</guid>
+      <description>&lt;p&gt;strconv拾遗&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>实战CGO</title>
       <link>https://high-server.github.io/post/arch/cgo/</link>
@@ -47,6 +56,15 @@ func main&lt;span style=&#34;color:#f92672&#34;&gt;()&lt;/span&gt; &lt;span styl
 	_ &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; http.ListenAndServe&lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;localhost:6060&amp;#34;&lt;/span&gt;, nil&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
 &lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;需要注意的是，千万别让外网访问到 pprof，否则可能会导致出现安全问题。有兴趣的读者可以尝试通过 google 搜索「intitle:/debug/pprof/ inurl:/debug/pprof/」看看反面例子。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Golang类型转换 一</title>
+      <link>https://high-server.github.io/post/inside-golang/strconv1/</link>
+      <pubDate>Tue, 01 Jun 2021 16:08:39 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/inside-golang/strconv1/</guid>
+      <description>&lt;p&gt;Atoi/Itoa函数实现&lt;/p&gt;</description>
     </item>
     
     <item>
