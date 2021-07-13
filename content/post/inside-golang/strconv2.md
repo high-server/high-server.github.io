@@ -47,7 +47,7 @@ func ParseBool(str string) (bool, error) {
 #### ParseFloat 
 ParseFloat稍微复杂点，不过也是一样的套路：检查系统位数->检查极限字符->拆分字符串->遍历字符串  
 字符串“1.1”大致流程图  
-![字符串“1.1”大致流程图](/img/strconv1/strconvFloat1)  
+![字符串“1.1”大致流程图](/img/strconv1/strconvFloat1.png)  
 ParseFloat首先选择32/64位操作，32位转换和64位转换差别不大。以64位为例，具体使用内部函数atof64();   
 atof64()里面有三个重要函数，分别是special()名如其功能，就是检查是否存在特殊情况比如无穷或非数，但它只能识别infinity/inf/nan;   
 readFloat()将字符串拆解成mantissa uint64 尾数数, exp int指, neg 是否负数, trunc 是否溢出, hex bool是否十六进制, i int 占用字节数, ok bool 转换是否成功。有了这些后面就可以直接处理了。  
