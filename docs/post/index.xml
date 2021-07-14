@@ -6,7 +6,16 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 13 Jul 2021 15:30:41 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 14 Jul 2021 18:17:05 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>浅谈K8S下gRPC负载均衡问题</title>
+      <link>https://high-server.github.io/post/arch/grpc/</link>
+      <pubDate>Wed, 14 Jul 2021 18:17:05 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/grpc/</guid>
+      <description>&lt;p&gt;一般来说，在 K8S 下部署服务是很简单的事儿，但是如果部署的是一个 gRPC 服务的话，那么稍不留神就可能掉坑里，个中缘由，且听我慢慢道来。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Golang类型转换 二</title>
       <link>https://high-server.github.io/post/inside-golang/strconv2/</link>
