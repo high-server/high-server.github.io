@@ -6,7 +6,18 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 14 Jul 2021 18:17:05 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 16 Aug 2021 16:16:16 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>关于OCR项目的流水账</title>
+      <link>https://high-server.github.io/post/arch/ocr/</link>
+      <pubDate>Mon, 16 Aug 2021 16:16:16 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/ocr/</guid>
+      <description>&lt;p&gt;最近一直在开发某个 OCR 项目：底层用的是 ABBYY 提供的 FineReader 引擎，应用层把 FineReader 包装成 gRPC 对外提供服务，因为 FineReader 项目是 C++ 实现的，而我们团队使用的编程语言是 Golang，所以二者间通过 CGO 来完成交互。整个项目没有特殊的需求，只是鉴于 OCR 耗时较长，为了提升产品体验，要求在处理过程中：客户端可以主动退出；服务端能够实时返回已处理百分比。下面是根据需求画出来的流程图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://blog.huoding.com/wp-content/uploads/2021/08/flow.png&#34; alt=&#34;流程图&#34;&gt;&lt;/p&gt;
+&lt;p&gt;看上去很简单，不过我还是遇到不少问题，虽然这些问题主要都是一些细枝末节，基本上和 OCR 没什么关系，但是对别的项目还是会有所帮助的，下面让我一一道来。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>浅谈K8S下gRPC负载均衡问题</title>
       <link>https://high-server.github.io/post/arch/grpc/</link>

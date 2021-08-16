@@ -46,6 +46,26 @@
 	</header><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/arch/ocr/" rel="bookmark">
+			关于OCR项目的流水账
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-16T16:16:16&#43;08:00">2021-08-16</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
+	</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		<p>最近一直在开发某个 OCR 项目：底层用的是 ABBYY 提供的 FineReader 引擎，应用层把 FineReader 包装成 gRPC 对外提供服务，因为 FineReader 项目是 C++ 实现的，而我们团队使用的编程语言是 Golang，所以二者间通过 CGO 来完成交互。整个项目没有特殊的需求，只是鉴于 OCR 耗时较长，为了提升产品体验，要求在处理过程中：客户端可以主动退出；服务端能够实时返回已处理百分比。下面是根据需求画出来的流程图：</p>
+<p><img src="https://blog.huoding.com/wp-content/uploads/2021/08/flow.png" alt="流程图"></p>
+<p>看上去很简单，不过我还是遇到不少问题，虽然这些问题主要都是一些细枝末节，基本上和 OCR 没什么关系，但是对别的项目还是会有所帮助的，下面让我一一道来。</p>
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/grpc/" rel="bookmark">
 			浅谈K8S下gRPC负载均衡问题
 			</a>
@@ -113,35 +133,6 @@
 Kubernetes 中 iptables 作为 kube-proxy 里控制流量转发的核心模式，通过在目标 node 的 iptables 中增加一些自定义链对流经到该 node 的数据包做DNAT和SNAT操作以实现路由、负载均衡和地址转换。  <br>
 ServiceMesh 服务网格中 Istio 通过 init 容器（启动命令为istio-iptables）给 Sidecar 容器即 Envoy 代理做初始化，设置 iptables 端口转发，从而实现流量劫持&amp;转发控制等服务治理相关。</p>
 	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/pprof/" rel="bookmark">
-			浅谈pprof
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-06-06T15:45:29&#43;08:00">2021-06-06</time></div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>对于大多数 Gopher 而言，一般平时最主要的工作内容除了实现各种无聊的业务逻辑之外，剩下的就是解决各种琐碎的问题。比如：查询性能瓶颈在哪里？查询内存泄漏在哪里？好在 pprof 是处理此类问题的利器，共有两套标准库，分别适用于不同的场景：</p>
-<ul>
-<li><a href="https://golang.org/pkg/runtime/pprof/">runtime/pprof</a>：采集工具型应用运行数据进行分析</li>
-<li><a href="https://golang.org/pkg/net/http/pprof/">net/http/pprof</a>：采集服务型应用运行时数据进行分析</li>
-</ul>
-<p>命令行工具「go test」就包含了 runtime/pprof，相关参数请参考「go help testflag」：</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; go test -cpuprofile cpu.out -memprofile mem.out -bench .
-</code></pre></div><p>不过和 runtime/pprof 相比，更常用的是 net/http/pprof，接下来我们主要通过它来解决一些常见问题，想要激活 net/http/pprof 的话很简单，只要导入对应的包并启动服务即可：</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">import _ <span style="color:#e6db74">&#34;net/http/pprof&#34;</span>
-
-func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-	_ <span style="color:#f92672">=</span> http.ListenAndServe<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;localhost:6060&#34;</span>, nil<span style="color:#f92672">)</span>
-<span style="color:#f92672">}</span>
-</code></pre></div><p>需要注意的是，千万别让外网访问到 pprof，否则可能会导致出现安全问题。有兴趣的读者可以尝试通过 google 搜索「intitle:/debug/pprof/ inurl:/debug/pprof/」看看反面例子。</p>
-	</div>
 </article>
 </main>
 
@@ -179,7 +170,7 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/">架构技术</a>&nbsp;
-				<span class="widget__counter widget__counter--bubble">5</span>
+				<span class="widget__counter widget__counter--bubble">6</span>
 				</li>
 		</ul>
 	</div>
@@ -188,11 +179,11 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/ocr/">关于OCR项目的流水账</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/grpc/">浅谈K8S下gRPC负载均衡问题</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/inside-golang/strconv2/">Golang类型转换 二</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/cgo/">实战CGO</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/iptables/">从iptables谈ServiceMesh流量拦截</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/pprof/">浅谈pprof</a></li>
 		</ul>
 	</div>
 </div>

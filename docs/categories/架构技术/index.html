@@ -46,6 +46,26 @@
 	</header><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/arch/ocr/" rel="bookmark">
+			关于OCR项目的流水账
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-16T16:16:16&#43;08:00">2021-08-16</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
+	</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		<p>最近一直在开发某个 OCR 项目：底层用的是 ABBYY 提供的 FineReader 引擎，应用层把 FineReader 包装成 gRPC 对外提供服务，因为 FineReader 项目是 C++ 实现的，而我们团队使用的编程语言是 Golang，所以二者间通过 CGO 来完成交互。整个项目没有特殊的需求，只是鉴于 OCR 耗时较长，为了提升产品体验，要求在处理过程中：客户端可以主动退出；服务端能够实时返回已处理百分比。下面是根据需求画出来的流程图：</p>
+<p><img src="https://blog.huoding.com/wp-content/uploads/2021/08/flow.png" alt="流程图"></p>
+<p>看上去很简单，不过我还是遇到不少问题，虽然这些问题主要都是一些细枝末节，基本上和 OCR 没什么关系，但是对别的项目还是会有所帮助的，下面让我一一道来。</p>
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/iptables/" rel="bookmark">
 			从iptables谈ServiceMesh流量拦截
 			</a>
@@ -123,27 +143,13 @@ ServiceMesh 服务网格中 Istio 通过 init 容器（启动命令为istio-ipta
 	<div class="content list__excerpt post__content clearfix">
 		<p>我用过很多消息系统，比如：简单的 <a href="https://redis.io/topics/streams-intro">Redis Streams</a>；高效的 <a href="https://kafka.apache.org/">Kafaka</a> 等等，不过自从我把编程语言切换到 Golang 以后，总觉得必须找个用 Golang 开发的消息系统才配得上门当户对，原本我已经和小家碧玉的 <a href="https://nsq.io/">NSQ</a> 厮守终生，不过当我认识了上流社会 <a href="https://landscape.cncf.io/">CNCF</a> 钦定的大家闺秀 <a href="https://nats.io/">NATS</a> 后，刹那间就仿佛徐志摩遇到了林徽因，扭头就给结发妻子写了休书。</p>
 	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/microservice/" rel="bookmark">
-			浅谈微服务
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-18T10:17:01&#43;08:00">2021-05-18</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
-	</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>虽说<a href="https://martinfowler.com/articles/microservices.html">微服务</a>是一个老生常谈的话题，在 <a href="https://www.infoq.cn/topic/microservice">infoq</a> 或者 <a href="https://insights.thoughtworks.cn/tag/microservices/">thoughtworks</a> 上可以找到很多案例，不过可惜的是其中相当比例的案例是失败的案例，究其原因，除了<a href="https://microservices.io/index.html">技术门槛</a>之外，主要是因为很多人脱离了实际情况，只是为了微服务而微服务。本文通过一个例子带领大家从头到尾体验一下微服务的演化过程，不仅要做到知其然，更要做到知其所以然。</p>
-	</div>
 </article>
 </main>
 
+<div class="pagination">
+	<span class="pagination__item pagination__item--current">1/2</span>
+	<a class="pagination__item pagination__item--next btn" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/page/2/">»</a>
+</div>
 
 			</div>
 			
@@ -174,7 +180,7 @@ ServiceMesh 服务网格中 Istio 通过 init 容器（启动命令为istio-ipta
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/">架构技术</a>&nbsp;
-				<span class="widget__counter widget__counter--bubble">5</span>
+				<span class="widget__counter widget__counter--bubble">6</span>
 				</li>
 		</ul>
 	</div>
@@ -183,11 +189,11 @@ ServiceMesh 服务网格中 Istio 通过 init 容器（启动命令为istio-ipta
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/ocr/">关于OCR项目的流水账</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/grpc/">浅谈K8S下gRPC负载均衡问题</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/inside-golang/strconv2/">Golang类型转换 二</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/cgo/">实战CGO</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/iptables/">从iptables谈ServiceMesh流量拦截</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/pprof/">浅谈pprof</a></li>
 		</ul>
 	</div>
 </div>
