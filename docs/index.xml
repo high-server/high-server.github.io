@@ -6,7 +6,18 @@
     <description>Recent content on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 16 Aug 2021 16:16:16 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 19 Aug 2021 15:57:16 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>记一次对Makefile的重构</title>
+      <link>https://high-server.github.io/post/arch/makefile/</link>
+      <pubDate>Thu, 19 Aug 2021 15:57:16 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/makefile/</guid>
+      <description>如果你不了解 Makefile 的话，那么推荐看看阮一峰的文章「Make 命令教程」。本文通过一个重构的例子带你写出味道更好的 Makefile，让我们开始吧！
+假设有一个名为 foo 的项目，用 golang 开发，在 docker 上部署，其 Makefile 如下：
+APP = $(shell basename ${CURDIR}) TAG = $(shell git log --pretty=format:&amp;#34;%cd.%h&amp;#34; --date=short -1) .PHONY: build build: go build -ldflags &amp;#34;-X &amp;#39;main.version=${TAG}&amp;#39;&amp;#34; -o ./tmp/${APP} . .PHONY: docker-config docker-config: env TAG=${TAG} docker-compose config .PHONY: docker-build docker-build: env TAG=${TAG} docker-compose build .PHONY: docker-push docker-push: env TAG=${TAG} docker-compose push .PHONY: docker-up docker-up: env TAG=${TAG} docker-compose up .PHONY: docker-down docker-down: TAG=${TAG} docker-compose down 看上去很简洁，唯一需要说明的是在操作 docker-compose 的时候，传递了一个名为 TAG 的环境变量，表示项目当前所属的标签，看一下对应的 docker-compose.</description>
+    </item>
+    
     <item>
       <title>关于OCR项目的流水账</title>
       <link>https://high-server.github.io/post/arch/ocr/</link>
