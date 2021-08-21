@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>记又一次对Makefile的重构 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">记又一次对Makefile的重构</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-21T14:42:19&#43;08:00">2021-08-21</time></div></div>
+		</header><div class="content post__content clearfix">
+			<p>前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！</p>
+<p>让我们先把问题的来龙去脉搞清楚，在 Golang 项目里，一般<a href="https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module">推荐</a>在根目录创建一个名为 tools.go 的文件，里面记录本项目依赖的相关工具，比如我的某个项目的 tools.go 如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// +build tools
+</span><span style="color:#75715e"></span>
+<span style="color:#f92672">package</span> <span style="color:#a6e22e">tools</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#75715e">// _ &#34;github.com/cosmtrek/air&#34;
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// _ &#34;github.com/goreleaser/goreleaser&#34;
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">_</span> <span style="color:#e6db74">&#34;github.com/bufbuild/buf/cmd/buf&#34;</span>
+	<span style="color:#a6e22e">_</span> <span style="color:#e6db74">&#34;github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway&#34;</span>
+	<span style="color:#a6e22e">_</span> <span style="color:#e6db74">&#34;github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2&#34;</span>
+	<span style="color:#a6e22e">_</span> <span style="color:#e6db74">&#34;github.com/tomwright/dasel/cmd/dasel&#34;</span>
+	<span style="color:#a6e22e">_</span> <span style="color:#e6db74">&#34;google.golang.org/grpc/cmd/protoc-gen-go-grpc&#34;</span>
+	<span style="color:#a6e22e">_</span> <span style="color:#e6db74">&#34;google.golang.org/protobuf/cmd/protoc-gen-go&#34;</span>
+)
+</code></pre></div><p>如此一来，当执行「go mod tidy」的时候，依赖工具的版本信息就会记录到 go.mod，接下来一般推荐在 Makefile 里创建一个 dep 操作，用来安装（make dep）依赖工具：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-makefile" data-lang="makefile"><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> dep
+<span style="color:#a6e22e">dep</span><span style="color:#f92672">:</span>
+	@go install <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>		github.com/bufbuild/buf/cmd/buf <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>		github.com/tomwright/dasel/cmd/dasel <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>		google.golang.org/grpc/cmd/protoc-gen-go-grpc <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>		google.golang.org/protobuf/cmd/protoc-gen-go
+</code></pre></div><p>看上去不错，但是细心的你估计已经发现重复代码的坏味道了：tools.go 和 Makefile 文件内容重复了，以后如果想要增加一个依赖工具的话，那么两个文件都要改！</p>
+<p>下面让我们看看如何重构：tools.go 和 Makefile 比起来，肯定 tools.go 更重要，它是不能改的，所以我们要去掉 Makefile 里的重复代码，更具体点来说是最好能在 Makefile 里通过 解析 tools.go 来确定想要执行的 go install 操作，这不就是 awk 擅长的工作么：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-makefile" data-lang="makefile"><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> dep
+<span style="color:#a6e22e">dep</span><span style="color:#f92672">:</span>
+	@awk <span style="color:#e6db74">&#39;$1 == &#34;_&#34; { print $2 | &#34;go install&#34; }&#39;</span> ./tools.go
+</code></pre></div><p>看，通过一行 awk 代码，我们神奇的去掉了原本一坨重复代码，完美！</p>
+
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/makefile/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">记一次对Makefile的重构</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: 'post\/arch\/makefile2.md',
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>
