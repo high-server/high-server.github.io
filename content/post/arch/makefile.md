@@ -9,6 +9,8 @@ gitment: true
 
 如果你不了解 Makefile 的话，那么推荐看看阮一峰的文章「[Make 命令教程](https://www.ruanyifeng.com/blog/2015/02/make.html)」。本文通过一个重构的例子带你写出味道更好的 Makefile，让我们开始吧！
 
+<!--more-->
+
 假设有一个名为 foo 的项目，用 golang 开发，在 docker 上部署，其 Makefile 如下：
 
 ```makefile

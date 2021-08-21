@@ -7,7 +7,9 @@ draft: false
 gitment: true
 ---
 
-前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！
+我平常有一个习惯，就是不断看以前写的代码，想着有没有哪些方面可以改进，如果每天能把代码可读性量变​ 1%，那么日积月累就是质变：前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！
+
+<!--more-->
 
 让我们先把问题的来龙去脉搞清楚，在 Golang 项目里，一般[推荐](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)在根目录创建一个名为 tools.go 的文件，里面记录本项目依赖的相关工具，比如我的某个项目的 tools.go 如下：
 

@@ -57,10 +57,7 @@
 	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-21T14:42:19&#43;08:00">2021-08-21</time></div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
-		前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！
-让我们先把问题的来龙去脉搞清楚，在 Golang 项目里，一般推荐在根目录创建一个名为 tools.go 的文件，里面记录本项目依赖的相关工具，比如我的某个项目的 tools.go 如下：
-// +build tools  package tools import ( // _ &#34;github.com/cosmtrek/air&#34; 	// _ &#34;github.com/goreleaser/goreleaser&#34; 	_ &#34;github.com/bufbuild/buf/cmd/buf&#34; _ &#34;github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway&#34; _ &#34;github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2&#34; _ &#34;github.com/tomwright/dasel/cmd/dasel&#34; _ &#34;google.golang.org/grpc/cmd/protoc-gen-go-grpc&#34; _ &#34;google.golang.org/protobuf/cmd/protoc-gen-go&#34; ) 如此一来，当执行「go mod tidy」的时候，依赖工具的版本信息就会记录到 go.mod，接下来一般推荐在 Makefile 里创建一个 dep 操作，用来安装（make dep）依赖工具：
-.PHONY: dep dep: @go install \ 	github.com/bufbuild/buf/cmd/buf \ 	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \ 	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \ 	github.com/tomwright/dasel/cmd/dasel \ 	google.golang.org/grpc/cmd/protoc-gen-go-grpc \ 	google.
+		<p>我平常有一个习惯，就是不断看以前写的代码，想着有没有哪些方面可以改进，如果每天能把代码可读性量变​ 1%，那么日积月累就是质变：前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！</p>
 	</div>
 </article><article class="list__item post">
 	<header class="list__header">
@@ -76,9 +73,7 @@
 	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-19T15:57:16&#43;08:00">2021-08-19</time></div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
-		如果你不了解 Makefile 的话，那么推荐看看阮一峰的文章「Make 命令教程」。本文通过一个重构的例子带你写出味道更好的 Makefile，让我们开始吧！
-假设有一个名为 foo 的项目，用 golang 开发，在 docker 上部署，其 Makefile 如下：
-APP = $(shell basename ${CURDIR}) TAG = $(shell git log --pretty=format:&#34;%cd.%h&#34; --date=short -1) .PHONY: build build: go build -ldflags &#34;-X &#39;main.version=${TAG}&#39;&#34; -o ./tmp/${APP} . .PHONY: docker-config docker-config: env TAG=${TAG} docker-compose config .PHONY: docker-build docker-build: env TAG=${TAG} docker-compose build .PHONY: docker-push docker-push: env TAG=${TAG} docker-compose push .PHONY: docker-up docker-up: env TAG=${TAG} docker-compose up .PHONY: docker-down docker-down: TAG=${TAG} docker-compose down 看上去很简洁，唯一需要说明的是在操作 docker-compose 的时候，传递了一个名为 TAG 的环境变量，表示项目当前所属的标签，看一下对应的 docker-compose.
+		<p>如果你不了解 Makefile 的话，那么推荐看看阮一峰的文章「<a href="https://www.ruanyifeng.com/blog/2015/02/make.html">Make 命令教程</a>」。本文通过一个重构的例子带你写出味道更好的 Makefile，让我们开始吧！</p>
 	</div>
 </article><article class="list__item post">
 	<header class="list__header">

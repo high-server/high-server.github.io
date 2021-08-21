@@ -200,7 +200,6 @@ DEBUG_PORT <span style="color:#f92672">=</span> <span style="color:#66d9ef">$(</
 <span style="color:#a6e22e">docker-down</span><span style="color:#f92672">:</span>
 	docker-compose down
 </code></pre></div><p>在 Makefile 里，我们定义了一个 env 操作，并把它作为所有 docker-compose 操作的前置执行操作，终于不用再写长长的环境变量了，不过记得把 .env 写到 .gitignore 里！</p>
-
 		</div>
 	</article>
 </main>
