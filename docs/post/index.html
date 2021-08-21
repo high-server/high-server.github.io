@@ -46,6 +46,25 @@
 	</header><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/arch/makefile2/" rel="bookmark">
+			记又一次对Makefile的重构
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-21T14:42:19&#43;08:00">2021-08-21</time></div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！
+让我们先把问题的来龙去脉搞清楚，在 Golang 项目里，一般推荐在根目录创建一个名为 tools.go 的文件，里面记录本项目依赖的相关工具，比如我的某个项目的 tools.go 如下：
+// +build tools  package tools import ( // _ &#34;github.com/cosmtrek/air&#34; 	// _ &#34;github.com/goreleaser/goreleaser&#34; 	_ &#34;github.com/bufbuild/buf/cmd/buf&#34; _ &#34;github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway&#34; _ &#34;github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2&#34; _ &#34;github.com/tomwright/dasel/cmd/dasel&#34; _ &#34;google.golang.org/grpc/cmd/protoc-gen-go-grpc&#34; _ &#34;google.golang.org/protobuf/cmd/protoc-gen-go&#34; ) 如此一来，当执行「go mod tidy」的时候，依赖工具的版本信息就会记录到 go.mod，接下来一般推荐在 Makefile 里创建一个 dep 操作，用来安装（make dep）依赖工具：
+.PHONY: dep dep: @go install \ 	github.com/bufbuild/buf/cmd/buf \ 	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \ 	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \ 	github.com/tomwright/dasel/cmd/dasel \ 	google.golang.org/grpc/cmd/protoc-gen-go-grpc \ 	google.
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/makefile/" rel="bookmark">
 			记一次对Makefile的重构
 			</a>
@@ -115,22 +134,6 @@ APP = $(shell basename ${CURDIR}) TAG = $(shell git log --pretty=format:&#34;%cd
 	<div class="content list__excerpt post__content clearfix">
 		<p>strconv拾遗</p>
 	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/cgo/" rel="bookmark">
-			实战CGO
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-07-03T15:01:55&#43;08:00">2021-07-03</time></div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>某项目要集成 PDF 文件的 OCR 功能，不过由于此功能技术难度太大，网络上找不到靠谱的开源实现，最终不得不选择 <a href="https://www.abbyy.com/ocr-sdk/">ABBYY FineReader Engine</a> 的付费服务。可惜 ABBYY 只提供了 C++ 和 Java 两种编程语言的 SDK，而我们的项目采用的编程语言是 Golang，此时通常的集成方法是使用 C++ 或 Java 实现一个服务，然后在 Golang 项目里通过 RPC 调用服务，不过如此一来明显增加了系统的复杂度，好在 Golang 支持 CGO，让我们可以很方便的在 Golang 中使用 C 模块，本文总结了我在学习 CGO 过程中的心得体会。</p>
-	</div>
 </article>
 </main>
 
@@ -177,11 +180,11 @@ APP = $(shell basename ${CURDIR}) TAG = $(shell git log --pretty=format:&#34;%cd
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/makefile2/">记又一次对Makefile的重构</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/makefile/">记一次对Makefile的重构</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/ocr/">关于OCR项目的流水账</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/grpc/">浅谈K8S下gRPC负载均衡问题</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/inside-golang/strconv2/">Golang类型转换 二</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/cgo/">实战CGO</a></li>
 		</ul>
 	</div>
 </div>

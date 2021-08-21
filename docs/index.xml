@@ -6,7 +6,19 @@
     <description>Recent content on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 19 Aug 2021 15:57:16 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 21 Aug 2021 14:42:19 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>记又一次对Makefile的重构</title>
+      <link>https://high-server.github.io/post/arch/makefile2/</link>
+      <pubDate>Sat, 21 Aug 2021 14:42:19 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/makefile2/</guid>
+      <description>前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！
+让我们先把问题的来龙去脉搞清楚，在 Golang 项目里，一般推荐在根目录创建一个名为 tools.go 的文件，里面记录本项目依赖的相关工具，比如我的某个项目的 tools.go 如下：
+// +build tools  package tools import ( // _ &amp;#34;github.com/cosmtrek/air&amp;#34; 	// _ &amp;#34;github.com/goreleaser/goreleaser&amp;#34; 	_ &amp;#34;github.com/bufbuild/buf/cmd/buf&amp;#34; _ &amp;#34;github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway&amp;#34; _ &amp;#34;github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2&amp;#34; _ &amp;#34;github.com/tomwright/dasel/cmd/dasel&amp;#34; _ &amp;#34;google.golang.org/grpc/cmd/protoc-gen-go-grpc&amp;#34; _ &amp;#34;google.golang.org/protobuf/cmd/protoc-gen-go&amp;#34; ) 如此一来，当执行「go mod tidy」的时候，依赖工具的版本信息就会记录到 go.mod，接下来一般推荐在 Makefile 里创建一个 dep 操作，用来安装（make dep）依赖工具：
+.PHONY: dep dep: @go install \ 	github.com/bufbuild/buf/cmd/buf \ 	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \ 	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \ 	github.com/tomwright/dasel/cmd/dasel \ 	google.golang.org/grpc/cmd/protoc-gen-go-grpc \ 	google.</description>
+    </item>
+    
     <item>
       <title>记一次对Makefile的重构</title>
       <link>https://high-server.github.io/post/arch/makefile/</link>
