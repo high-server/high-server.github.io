@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>在docker环境导入私有仓库的问题 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">在docker环境导入私有仓库的问题</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-24T15:55:52&#43;08:00">2021-08-24</time></div></div>
+		</header><div class="content post__content clearfix">
+			<p>最近我遇到了一个在 docker 环境导入私有仓库的问题：一个 Golang 项目，使用 <a href="https://docs.gitlab.com/ee/ci/">gitlab ci</a> 来发布，通过 <a href="https://docs.gitlab.com/runner/">gitlab runner</a> 调用 <a href="https://docs.docker.com/compose/">docker-compose</a> 来打包，但是在构建时失败了。</p>
+<p>让我们重回案发现场，看看是否留下了什么线索：</p>
+<p>首先是 .gitlab-ci.yml 文件，其相关代码片段内容如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">build_job</span>:
+  <span style="color:#f92672">stage</span>: <span style="color:#ae81ff">build</span>
+  <span style="color:#f92672">script</span>:
+    - <span style="color:#ae81ff">make docker-build</span>
+</code></pre></div><p>然后是 Makefile 文件，其相关代码片段内容如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">.PHONY</span>: <span style="color:#ae81ff">docker-build</span>
+<span style="color:#f92672">docker-build</span>:
+	@<span style="color:#ae81ff">docker-compose build</span>
+</code></pre></div><p>接着是 docker-compose.yml 文件，其相关代码片段内容如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">build</span>:
+  <span style="color:#f92672">context</span>: <span style="color:#ae81ff">.</span>
+  <span style="color:#f92672">dockerfile</span>: <span style="color:#ae81ff">Dockerfile</span>
+</code></pre></div><p>最后是 Dockfile 文件，其相关代码片段内容一下：</p>
+<pre><code>FROM golang:1.17 AS builder
+WORKDIR /go/src/app
+COPY . .
+RUN go build
+</code></pre><p>结果在 build 的时候报错了：</p>
+<blockquote>
+<p>fatal: could not read Username for ‘https://git.domain.com’: terminal prompts disabled</p>
+</blockquote>
+<p>因为 git.domain.com 是一个私有仓库，所以问题乍一看上去会以为是 GOPRIVATE 和 GOPROXY 的配置有问题，不过我的配置都是 OK 的：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; go env -w GOPRIVATE<span style="color:#f92672">=</span>git.domain.com
+shell&gt; go env -w GOPROXY<span style="color:#f92672">=</span>https://goproxy.cn,direct
+</code></pre></div><p>实际上，根本原因是因为访问私有仓库的时候是需要用户名和密码的，但是在 docker 容器里获取不到用户名密码，所以就报错了。下面看看我是如何解决问题的：</p>
+<h2 id="第一次尝试">第一次尝试</h2>
+<p>既然问题出在用户名密码上，那么把仓库改成公开的不就可以了么？可惜结果报错：</p>
+<blockquote>
+<p>Visibility level public is not allowed in a private group.</p>
+</blockquote>
+<p>我用的是 gitlab，它不允许在私有组里搞一个公开项目。</p>
+<h2 id="第二次尝试">第二次尝试</h2>
+<p>既然搞不成公开项目，那么就想办法传递用户名密码吧，不过我们在使用 git 的时候，一般不会直接使用用户名密码，而是使用 KEY 来访问仓库，下面举例说明一下如何传递私钥参数 SSH_PRIVATE_KEY（其中牵扯到一个 docker 构建参数的概念）：</p>
+<p>首先因为此类信息比较敏感，所以应该避免硬编码，我们选择在 gitlab 里创建它：</p>
+<p><img src="https://blog.huoding.com/wp-content/uploads/2021/08/variable.png" alt="Secret variables: settings > Pipelines"></p>
+<p>接着是 docker-compose.yml 文件，其相关代码片段内容如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">build</span>:
+  <span style="color:#f92672">context</span>: <span style="color:#ae81ff">.</span>
+  <span style="color:#f92672">dockerfile</span>: <span style="color:#ae81ff">Dockerfile</span>
+  <span style="color:#f92672">args</span>:
+    - <span style="color:#ae81ff">SSH_PRIVATE_KEY</span>
+</code></pre></div><p>最后是 Dockfile 文件，其相关代码片段内容一下：</p>
+<pre><code>FROM golang:1.17 AS builder
+ARG SSH_PRIVATE_KEY
+WORKDIR /go/src/app
+COPY . .
+RUN umask 0077 \
+    &amp;&amp; mkdir -p ~/.ssh \
+    &amp;&amp; echo &quot;${SSH_PRIVATE_KEY}&quot; &gt; ~/.ssh/id_rsa \
+    &amp;&amp; ssh-keyscan git.domain.com &gt;&gt; ~/.ssh/known_hosts \
+    &amp;&amp; git config --global url.&quot;git@git.domain.com:&quot;.insteadOf https://git.domain.com/
+RUN go build
+</code></pre><p>此方法可以解决问题，但是把敏感信息传来传去总觉得不安心，容易出问题，推荐：<a href="https://vsupalov.com/build-docker-image-clone-private-repo-ssh-key/">Access Private Repositories from Your Dockerfile Without Leaving Behind Your SSH Keys</a>。</p>
+<h2 id="第三次尝试">第三次尝试</h2>
+<p>如果不想把敏感信息传来传去，那么还有没有安全的解决方案呢？答案是肯定的！我们只要在 gitlab runner 里执行「go mod vendor」就可以了，这是因为 gitlab runner 已经缓存了 git 认证信息，它可以访问所有的私有仓库，当执行「go mod vendor」后，项目依赖就都被放到 vendor 目录里了，接下来当执行到 Dockerfile 的 COPY 指令时，依赖就被自然而然的拷贝到了容器中，从而不用再联网执行 git 下载。</p>
+<p>下面是修改后的 .gitlab-ci.yaml 文件，其相关代码片段内容如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">build_job</span>:
+  <span style="color:#f92672">stage</span>: <span style="color:#ae81ff">build</span>
+  <span style="color:#f92672">script</span>:
+    - <span style="color:#ae81ff">go mod vendor</span>
+    - <span style="color:#ae81ff">make docker-build</span>
+</code></pre></div><p>也就是说，我们只加了一行代码「go mod vendor」，就解决了问题，是不是很简洁。最后友情提示一下：记得把 vendor 目录放到 .gitignore 里哦。</p>
+
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/makefile2/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">记又一次对Makefile的重构</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: 'post\/arch\/private.md',
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

@@ -6,7 +6,24 @@
     <description>Recent content on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 21 Aug 2021 14:42:19 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 24 Aug 2021 15:55:52 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>在docker环境导入私有仓库的问题</title>
+      <link>https://high-server.github.io/post/arch/private/</link>
+      <pubDate>Tue, 24 Aug 2021 15:55:52 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/private/</guid>
+      <description>最近我遇到了一个在 docker 环境导入私有仓库的问题：一个 Golang 项目，使用 gitlab ci 来发布，通过 gitlab runner 调用 docker-compose 来打包，但是在构建时失败了。
+让我们重回案发现场，看看是否留下了什么线索：
+首先是 .gitlab-ci.yml 文件，其相关代码片段内容如下：
+build_job: stage: build script: - make docker-build 然后是 Makefile 文件，其相关代码片段内容如下：
+.PHONY: docker-build docker-build: @docker-compose build 接着是 docker-compose.yml 文件，其相关代码片段内容如下：
+build: context: . dockerfile: Dockerfile 最后是 Dockfile 文件，其相关代码片段内容一下：
+FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 build 的时候报错了：
+ fatal: could not read Username for ‘https://git.domain.com’: terminal prompts disabled
+ 因为 git.</description>
+    </item>
+    
     <item>
       <title>记又一次对Makefile的重构</title>
       <link>https://high-server.github.io/post/arch/makefile2/</link>
