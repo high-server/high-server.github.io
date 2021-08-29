@@ -47,7 +47,9 @@
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-21T14:42:19&#43;08:00">2021-08-21</time></div></div>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-21T14:42:19&#43;08:00">2021-08-21</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+</div></div>
 		</header><div class="content post__content clearfix">
 			<p>我平常有一个习惯，就是不断看以前写的代码，想着有没有哪些方面可以改进，如果每天能把代码可读性量变​ 1%，那么日积月累就是质变：前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！</p>
 <p>让我们先把问题的来龙去脉搞清楚，在 Golang 项目里，一般<a href="https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module">推荐</a>在根目录创建一个名为 tools.go 的文件，里面记录本项目依赖的相关工具，比如我的某个项目的 tools.go 如下：</p>

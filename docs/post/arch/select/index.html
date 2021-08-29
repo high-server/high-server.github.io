@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>一个select死锁问题 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">一个select死锁问题</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-29T21:18:16&#43;08:00">2021-08-29</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>话说前几天我遇到了一个死锁问题，当时想了一些办法糊弄过去了，不过并没有搞明白问题的细节，周末想起来便继续研究了一下，最终便有了这篇文章。</p>
+<p>让我们搞一段简单的代码来重现一下当时我遇到的问题：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;sync&#34;</span>
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+	<span style="color:#a6e22e">foo</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+	<span style="color:#a6e22e">bar</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+	<span style="color:#a6e22e">closing</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{})
+	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
+	<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+		<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+		<span style="color:#66d9ef">select</span> {
+		<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">foo</span> <span style="color:#f92672">&lt;-</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">bar</span>:
+		<span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">closing</span>:
+			println(<span style="color:#e6db74">&#34;closing&#34;</span>)
+		}
+	}()
+	<span style="color:#75715e">// bar &lt;- 123
+</span><span style="color:#75715e"></span>	close(<span style="color:#a6e22e">closing</span>)
+	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+}
+</code></pre></div><p>运行后报错，提示死锁：</p>
+<blockquote>
+<p>fatal error: all goroutines are asleep – deadlock!</p>
+</blockquote>
+<p>因为「foo &lt;- &lt;-bar」的写法不太常见，所以第一感觉是不是 select 的 case 语句只能操作一个 chan，不能同时操作多个 chan，于是我改了一下，每个 case 只读写一个 chan：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;sync&#34;</span>
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+	<span style="color:#a6e22e">foo</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+	<span style="color:#a6e22e">bar</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+	<span style="color:#a6e22e">closing</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{})
+	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
+	<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+		<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+		<span style="color:#66d9ef">select</span> {
+		<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">v</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">bar</span>:
+			<span style="color:#a6e22e">foo</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">v</span>
+		<span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">closing</span>:
+			println(<span style="color:#e6db74">&#34;closing&#34;</span>)
+		}
+	}()
+	close(<span style="color:#a6e22e">closing</span>)
+	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+}
+</code></pre></div><p>果然死锁消失了！似乎 select 中，每个 case 确实只能读写一个 chan。为了确认到底是不是这个原因，我又修改了一下最初有问题的代码，加上了「bar &lt;- 123」，结果死锁也消失了。看来虽然我找到了解决问题的方法，但是并没有找到解释问题的原因。</p>
+<p>周末在家躺在床上，想起我认识的一个 golang 大神总对我说的：一切问题的答案都在 <a href="https://golang.org/ref/spec">spec</a> 里。于是挣扎着爬起来仔细翻阅关于 <a href="https://golang.org/ref/spec#Select_statements">select</a> 的说明，终于发现了问题真正的原因：</p>
+<blockquote>
+<p>For all the cases in the statement, the channel operands of receive operations and the channel and right-hand-side expressions of send statements are evaluated exactly once, in source order, upon entering the “select” statement. The result is a set of channels to receive from or send to, and the corresponding values to send. Any side effects in that evaluation will occur irrespective of which (if any) communication operation is selected to proceed. Expressions on the left-hand side of a RecvStmt with a short variable declaration or assignment are not yet evaluated.</p>
+</blockquote>
+<p>结合这段话，让我们再来看看 case 中的这行代码「foo &lt;- &lt;-bar」，当左手边（foo）是一个写 chan 的操作，右手边（&lt;-bar）是一个读 chan 的操作的时候，会先执行右手边的操作，如果拿到结果后再选择 case 执行，如果拿不到结果就会一直堵塞，于是死锁。</p>
+<p>如果你觉得自己已经完全明白了，那么不妨看看下面这段代码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+	<span style="color:#e6db74">&#34;time&#34;</span>
+)
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">talk</span>(<span style="color:#a6e22e">msg</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">sleep</span> <span style="color:#66d9ef">int</span>) <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span> {
+	<span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>)
+	<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#ae81ff">5</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+			<span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Sprintf</span>(<span style="color:#e6db74">&#34;%s %d&#34;</span>, <span style="color:#a6e22e">msg</span>, <span style="color:#a6e22e">i</span>)
+			<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Duration</span>(<span style="color:#a6e22e">sleep</span>) <span style="color:#f92672">*</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Millisecond</span>)
+		}
+	}()
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ch</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">fanIn</span>(<span style="color:#a6e22e">input1</span>, <span style="color:#a6e22e">input2</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>) <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span> {
+	<span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>)
+	<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+		<span style="color:#66d9ef">for</span> {
+			<span style="color:#66d9ef">select</span> {
+			<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">input1</span>:
+			<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">input2</span>:
+			}
+		}
+	}()
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ch</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">fanIn</span>(<span style="color:#a6e22e">talk</span>(<span style="color:#e6db74">&#34;A&#34;</span>, <span style="color:#ae81ff">10</span>), <span style="color:#a6e22e">talk</span>(<span style="color:#e6db74">&#34;B&#34;</span>, <span style="color:#ae81ff">1000</span>))
+	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#ae81ff">10</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+		<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;%q\n&#34;</span>, <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>)
+	}
+}
+</code></pre></div><p>当然会出现死锁，我的问题是为什么每次都是不多不少输出一半数据才死锁？请回答。</p>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/private/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">在docker环境导入私有仓库的问题</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: 'post\/arch\/select.md',
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

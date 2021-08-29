@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Posts - 架构技术漫谈</title>
+	<title>实战 - 架构技术漫谈</title>
 	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
 	<meta name="description" content="">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,7 @@
 
 	<link rel="stylesheet" href="/css/style.css">
 	
-	<link rel="alternate" type="application/rss+xml" href="/post/index.xml" title="架构技术漫谈">
+	<link rel="alternate" type="application/rss+xml" href="/categories/%E5%AE%9E%E6%88%98/index.xml" title="架构技术漫谈">
 
 	<link rel="shortcut icon" href="/favicon.ico">
 		
@@ -42,113 +42,67 @@
 			
 <main class="main list" role="main">
 	<header class="main__header">
-		<h1 class="main__title">Posts</h1>
+		<h1 class="main__title">实战</h1>
 	</header><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
-			<a href="/post/arch/select/" rel="bookmark">
-			一个select死锁问题
+			<a href="/post/arch/grpc/" rel="bookmark">
+			浅谈K8S下gRPC负载均衡问题
 			</a>
 		</h2>
 		<div class="list__meta meta"><div class="meta__item-author meta__item">
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-29T21:18:16&#43;08:00">2021-08-29</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-07-14T18:17:05&#43;08:00">2021-07-14</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
 	</span>
 </div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
-		<p>话说前几天我遇到了一个死锁问题，当时想了一些办法糊弄过去了，不过并没有搞明白问题的细节，周末想起来便继续研究了一下，最终便有了这篇文章。</p>
+		<p>一般来说，在 K8S 下部署服务是很简单的事儿，但是如果部署的是一个 gRPC 服务的话，那么稍不留神就可能掉坑里，个中缘由，且听我慢慢道来。</p>
 	</div>
 </article><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
-			<a href="/post/arch/private/" rel="bookmark">
-			在docker环境导入私有仓库的问题
+			<a href="/post/arch/cgo/" rel="bookmark">
+			实战CGO
 			</a>
 		</h2>
 		<div class="list__meta meta"><div class="meta__item-author meta__item">
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-24T15:55:52&#43;08:00">2021-08-24</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-07-03T15:01:55&#43;08:00">2021-07-03</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
 	</span>
 </div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
-		最近我遇到了一个在 docker 环境导入私有仓库的问题：一个 Golang 项目，使用 gitlab ci 来发布，通过 gitlab runner 调用 docker-compose 来打包，但是在构建时失败了。
-让我们重回案发现场，看看是否留下了什么线索：
-首先是 .gitlab-ci.yml 文件，其相关代码片段内容如下：
-build_job: stage: build script: - make docker-build 然后是 Makefile 文件，其相关代码片段内容如下：
-.PHONY: docker-build docker-build: @docker-compose build 接着是 docker-compose.yml 文件，其相关代码片段内容如下：
-build: context: . dockerfile: Dockerfile 最后是 Dockfile 文件，其相关代码片段内容一下：
-FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 build 的时候报错了：
- fatal: could not read Username for ‘https://git.domain.com’: terminal prompts disabled
- 因为 git.
+		<p>某项目要集成 PDF 文件的 OCR 功能，不过由于此功能技术难度太大，网络上找不到靠谱的开源实现，最终不得不选择 <a href="https://www.abbyy.com/ocr-sdk/">ABBYY FineReader Engine</a> 的付费服务。可惜 ABBYY 只提供了 C++ 和 Java 两种编程语言的 SDK，而我们的项目采用的编程语言是 Golang，此时通常的集成方法是使用 C++ 或 Java 实现一个服务，然后在 Golang 项目里通过 RPC 调用服务，不过如此一来明显增加了系统的复杂度，好在 Golang 支持 CGO，让我们可以很方便的在 Golang 中使用 C 模块，本文总结了我在学习 CGO 过程中的心得体会。</p>
 	</div>
 </article><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
-			<a href="/post/arch/makefile2/" rel="bookmark">
-			记又一次对Makefile的重构
+			<a href="/post/arch/nats/" rel="bookmark">
+			浅谈NATS消息系统
 			</a>
 		</h2>
 		<div class="list__meta meta"><div class="meta__item-author meta__item">
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-21T14:42:19&#43;08:00">2021-08-21</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-24T10:28:44&#43;08:00">2021-05-24</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
 	</span>
 </div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
-		<p>我平常有一个习惯，就是不断看以前写的代码，想着有没有哪些方面可以改进，如果每天能把代码可读性量变​ 1%，那么日积月累就是质变：前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！</p>
-	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/makefile/" rel="bookmark">
-			记一次对Makefile的重构
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-19T15:57:16&#43;08:00">2021-08-19</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
-	</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>如果你不了解 Makefile 的话，那么推荐看看阮一峰的文章「<a href="https://www.ruanyifeng.com/blog/2015/02/make.html">Make 命令教程</a>」。本文通过一个重构的例子带你写出味道更好的 Makefile，让我们开始吧！</p>
-	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/ocr/" rel="bookmark">
-			关于OCR项目的流水账
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-16T16:16:16&#43;08:00">2021-08-16</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
-	</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>最近一直在开发某个 OCR 项目：底层用的是 ABBYY 提供的 FineReader 引擎，应用层把 FineReader 包装成 gRPC 对外提供服务，因为 FineReader 项目是 C++ 实现的，而我们团队使用的编程语言是 Golang，所以二者间通过 CGO 来完成交互。整个项目没有特殊的需求，只是鉴于 OCR 耗时较长，为了提升产品体验，要求在处理过程中：客户端可以主动退出；服务端能够实时返回已处理百分比。下面是根据需求画出来的流程图：</p>
-<p><img src="https://blog.huoding.com/wp-content/uploads/2021/08/flow.png" alt="流程图"></p>
-<p>看上去很简单，不过我还是遇到不少问题，虽然这些问题主要都是一些细枝末节，基本上和 OCR 没什么关系，但是对别的项目还是会有所帮助的，下面让我一一道来。</p>
+		<p>我用过很多消息系统，比如：简单的 <a href="https://redis.io/topics/streams-intro">Redis Streams</a>；高效的 <a href="https://kafka.apache.org/">Kafaka</a> 等等，不过自从我把编程语言切换到 Golang 以后，总觉得必须找个用 Golang 开发的消息系统才配得上门当户对，原本我已经和小家碧玉的 <a href="https://nsq.io/">NSQ</a> 厮守终生，不过当我认识了上流社会 <a href="https://landscape.cncf.io/">CNCF</a> 钦定的大家闺秀 <a href="https://nats.io/">NATS</a> 后，刹那间就仿佛徐志摩遇到了林徽因，扭头就给结发妻子写了休书。</p>
 	</div>
 </article>
 </main>
 
 <div class="pagination">
-	<span class="pagination__item pagination__item--current">1/4</span>
-	<a class="pagination__item pagination__item--next btn" href="/post/page/2/">»</a>
+	<a class="pagination__item pagination__item--prev btn" href="/categories/%E5%AE%9E%E6%88%98/">«</a>
+	<span class="pagination__item pagination__item--current">2/2</span>
 </div>
 
 			</div>

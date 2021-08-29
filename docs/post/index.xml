@@ -6,7 +6,16 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 24 Aug 2021 15:55:52 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 29 Aug 2021 21:18:16 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一个select死锁问题</title>
+      <link>https://high-server.github.io/post/arch/select/</link>
+      <pubDate>Sun, 29 Aug 2021 21:18:16 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/select/</guid>
+      <description>&lt;p&gt;话说前几天我遇到了一个死锁问题，当时想了一些办法糊弄过去了，不过并没有搞明白问题的细节，周末想起来便继续研究了一下，最终便有了这篇文章。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>在docker环境导入私有仓库的问题</title>
       <link>https://high-server.github.io/post/arch/private/</link>

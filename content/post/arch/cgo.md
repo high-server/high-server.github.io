@@ -2,6 +2,9 @@
 title: "实战CGO"
 date: 2021-07-03T15:01:55+08:00
 draft: false
+categories:
+  - "实战"
+
 #Comment
 gitment: true
 ---

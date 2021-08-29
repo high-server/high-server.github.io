@@ -2,6 +2,8 @@
 title: "在docker环境导入私有仓库的问题"
 date: 2021-08-24T15:55:52+08:00
 draft: false
+categories:
+  - "实战"
 
 #Comment
 gitment: true

@@ -6,18 +6,7 @@
     <description>Recent content in 架构技术 on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 16 Aug 2021 16:16:16 +0800</lastBuildDate><atom:link href="https://high-server.github.io/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>关于OCR项目的流水账</title>
-      <link>https://high-server.github.io/post/arch/ocr/</link>
-      <pubDate>Mon, 16 Aug 2021 16:16:16 +0800</pubDate>
-      
-      <guid>https://high-server.github.io/post/arch/ocr/</guid>
-      <description>&lt;p&gt;最近一直在开发某个 OCR 项目：底层用的是 ABBYY 提供的 FineReader 引擎，应用层把 FineReader 包装成 gRPC 对外提供服务，因为 FineReader 项目是 C++ 实现的，而我们团队使用的编程语言是 Golang，所以二者间通过 CGO 来完成交互。整个项目没有特殊的需求，只是鉴于 OCR 耗时较长，为了提升产品体验，要求在处理过程中：客户端可以主动退出；服务端能够实时返回已处理百分比。下面是根据需求画出来的流程图：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://blog.huoding.com/wp-content/uploads/2021/08/flow.png&#34; alt=&#34;流程图&#34;&gt;&lt;/p&gt;
-&lt;p&gt;看上去很简单，不过我还是遇到不少问题，虽然这些问题主要都是一些细枝末节，基本上和 OCR 没什么关系，但是对别的项目还是会有所帮助的，下面让我一一道来。&lt;/p&gt;</description>
-    </item>
-    
+    <lastBuildDate>Thu, 10 Jun 2021 14:38:48 +0800</lastBuildDate><atom:link href="https://high-server.github.io/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>从iptables谈ServiceMesh流量拦截</title>
       <link>https://high-server.github.io/post/arch/iptables/</link>
@@ -51,15 +40,6 @@ ServiceMesh 服务网格中 Istio 通过 init 容器（启动命令为istio-ipta
 &lt;li&gt;“容器”有自己的文件系统吗？&lt;/li&gt;
 &lt;li&gt;“容器”与虚拟机有什么区别？&lt;/li&gt;
 &lt;/ol&gt;</description>
-    </item>
-    
-    <item>
-      <title>浅谈NATS消息系统</title>
-      <link>https://high-server.github.io/post/arch/nats/</link>
-      <pubDate>Mon, 24 May 2021 10:28:44 +0800</pubDate>
-      
-      <guid>https://high-server.github.io/post/arch/nats/</guid>
-      <description>&lt;p&gt;我用过很多消息系统，比如：简单的 &lt;a href=&#34;https://redis.io/topics/streams-intro&#34;&gt;Redis Streams&lt;/a&gt;；高效的 &lt;a href=&#34;https://kafka.apache.org/&#34;&gt;Kafaka&lt;/a&gt; 等等，不过自从我把编程语言切换到 Golang 以后，总觉得必须找个用 Golang 开发的消息系统才配得上门当户对，原本我已经和小家碧玉的 &lt;a href=&#34;https://nsq.io/&#34;&gt;NSQ&lt;/a&gt; 厮守终生，不过当我认识了上流社会 &lt;a href=&#34;https://landscape.cncf.io/&#34;&gt;CNCF&lt;/a&gt; 钦定的大家闺秀 &lt;a href=&#34;https://nats.io/&#34;&gt;NATS&lt;/a&gt; 后，刹那间就仿佛徐志摩遇到了林徽因，扭头就给结发妻子写了休书。&lt;/p&gt;</description>
     </item>
     
     <item>

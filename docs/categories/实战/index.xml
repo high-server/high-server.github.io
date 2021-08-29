@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>实战 on 架构技术漫谈</title>
+    <link>https://high-server.github.io/categories/%E5%AE%9E%E6%88%98/</link>
+    <description>Recent content in 实战 on 架构技术漫谈</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 29 Aug 2021 21:18:16 +0800</lastBuildDate><atom:link href="https://high-server.github.io/categories/%E5%AE%9E%E6%88%98/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一个select死锁问题</title>
+      <link>https://high-server.github.io/post/arch/select/</link>
+      <pubDate>Sun, 29 Aug 2021 21:18:16 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/select/</guid>
+      <description>&lt;p&gt;话说前几天我遇到了一个死锁问题，当时想了一些办法糊弄过去了，不过并没有搞明白问题的细节，周末想起来便继续研究了一下，最终便有了这篇文章。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>在docker环境导入私有仓库的问题</title>
+      <link>https://high-server.github.io/post/arch/private/</link>
+      <pubDate>Tue, 24 Aug 2021 15:55:52 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/private/</guid>
+      <description>最近我遇到了一个在 docker 环境导入私有仓库的问题：一个 Golang 项目，使用 gitlab ci 来发布，通过 gitlab runner 调用 docker-compose 来打包，但是在构建时失败了。
+让我们重回案发现场，看看是否留下了什么线索：
+首先是 .gitlab-ci.yml 文件，其相关代码片段内容如下：
+build_job: stage: build script: - make docker-build 然后是 Makefile 文件，其相关代码片段内容如下：
+.PHONY: docker-build docker-build: @docker-compose build 接着是 docker-compose.yml 文件，其相关代码片段内容如下：
+build: context: . dockerfile: Dockerfile 最后是 Dockfile 文件，其相关代码片段内容一下：
+FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 build 的时候报错了：
+ fatal: could not read Username for ‘https://git.domain.com’: terminal prompts disabled
+ 因为 git.</description>
+    </item>
+    
+    <item>
+      <title>记又一次对Makefile的重构</title>
+      <link>https://high-server.github.io/post/arch/makefile2/</link>
+      <pubDate>Sat, 21 Aug 2021 14:42:19 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/makefile2/</guid>
+      <description>&lt;p&gt;我平常有一个习惯，就是不断看以前写的代码，想着有没有哪些方面可以改进，如果每天能把代码可读性量变​ 1%，那么日积月累就是质变：前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>记一次对Makefile的重构</title>
+      <link>https://high-server.github.io/post/arch/makefile/</link>
+      <pubDate>Thu, 19 Aug 2021 15:57:16 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/makefile/</guid>
+      <description>&lt;p&gt;如果你不了解 Makefile 的话，那么推荐看看阮一峰的文章「&lt;a href=&#34;https://www.ruanyifeng.com/blog/2015/02/make.html&#34;&gt;Make 命令教程&lt;/a&gt;」。本文通过一个重构的例子带你写出味道更好的 Makefile，让我们开始吧！&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>关于OCR项目的流水账</title>
+      <link>https://high-server.github.io/post/arch/ocr/</link>
+      <pubDate>Mon, 16 Aug 2021 16:16:16 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/ocr/</guid>
+      <description>&lt;p&gt;最近一直在开发某个 OCR 项目：底层用的是 ABBYY 提供的 FineReader 引擎，应用层把 FineReader 包装成 gRPC 对外提供服务，因为 FineReader 项目是 C++ 实现的，而我们团队使用的编程语言是 Golang，所以二者间通过 CGO 来完成交互。整个项目没有特殊的需求，只是鉴于 OCR 耗时较长，为了提升产品体验，要求在处理过程中：客户端可以主动退出；服务端能够实时返回已处理百分比。下面是根据需求画出来的流程图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://blog.huoding.com/wp-content/uploads/2021/08/flow.png&#34; alt=&#34;流程图&#34;&gt;&lt;/p&gt;
+&lt;p&gt;看上去很简单，不过我还是遇到不少问题，虽然这些问题主要都是一些细枝末节，基本上和 OCR 没什么关系，但是对别的项目还是会有所帮助的，下面让我一一道来。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>浅谈K8S下gRPC负载均衡问题</title>
+      <link>https://high-server.github.io/post/arch/grpc/</link>
+      <pubDate>Wed, 14 Jul 2021 18:17:05 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/grpc/</guid>
+      <description>&lt;p&gt;一般来说，在 K8S 下部署服务是很简单的事儿，但是如果部署的是一个 gRPC 服务的话，那么稍不留神就可能掉坑里，个中缘由，且听我慢慢道来。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>实战CGO</title>
+      <link>https://high-server.github.io/post/arch/cgo/</link>
+      <pubDate>Sat, 03 Jul 2021 15:01:55 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/cgo/</guid>
+      <description>&lt;p&gt;某项目要集成 PDF 文件的 OCR 功能，不过由于此功能技术难度太大，网络上找不到靠谱的开源实现，最终不得不选择 &lt;a href=&#34;https://www.abbyy.com/ocr-sdk/&#34;&gt;ABBYY FineReader Engine&lt;/a&gt; 的付费服务。可惜 ABBYY 只提供了 C++ 和 Java 两种编程语言的 SDK，而我们的项目采用的编程语言是 Golang，此时通常的集成方法是使用 C++ 或 Java 实现一个服务，然后在 Golang 项目里通过 RPC 调用服务，不过如此一来明显增加了系统的复杂度，好在 Golang 支持 CGO，让我们可以很方便的在 Golang 中使用 C 模块，本文总结了我在学习 CGO 过程中的心得体会。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>浅谈NATS消息系统</title>
+      <link>https://high-server.github.io/post/arch/nats/</link>
+      <pubDate>Mon, 24 May 2021 10:28:44 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/nats/</guid>
+      <description>&lt;p&gt;我用过很多消息系统，比如：简单的 &lt;a href=&#34;https://redis.io/topics/streams-intro&#34;&gt;Redis Streams&lt;/a&gt;；高效的 &lt;a href=&#34;https://kafka.apache.org/&#34;&gt;Kafaka&lt;/a&gt; 等等，不过自从我把编程语言切换到 Golang 以后，总觉得必须找个用 Golang 开发的消息系统才配得上门当户对，原本我已经和小家碧玉的 &lt;a href=&#34;https://nsq.io/&#34;&gt;NSQ&lt;/a&gt; 厮守终生，不过当我认识了上流社会 &lt;a href=&#34;https://landscape.cncf.io/&#34;&gt;CNCF&lt;/a&gt; 钦定的大家闺秀 &lt;a href=&#34;https://nats.io/&#34;&gt;NATS&lt;/a&gt; 后，刹那间就仿佛徐志摩遇到了林徽因，扭头就给结发妻子写了休书。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -2,6 +2,9 @@
 title: "浅谈K8S下gRPC负载均衡问题"
 date: 2021-07-14T18:17:05+08:00
 draft: false
+categories:
+  - "实战"
+
 #Comment
 gitment: true
 ---

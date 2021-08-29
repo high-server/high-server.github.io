@@ -45,6 +45,24 @@
 	<article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/arch/select/" rel="bookmark">
+			一个select死锁问题
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-29T21:18:16&#43;08:00">2021-08-29</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		<p>话说前几天我遇到了一个死锁问题，当时想了一些办法糊弄过去了，不过并没有搞明白问题的细节，周末想起来便继续研究了一下，最终便有了这篇文章。</p>
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/private/" rel="bookmark">
 			在docker环境导入私有仓库的问题
 			</a>
@@ -53,7 +71,9 @@
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-24T15:55:52&#43;08:00">2021-08-24</time></div></div>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-24T15:55:52&#43;08:00">2021-08-24</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+</div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
 		最近我遇到了一个在 docker 环境导入私有仓库的问题：一个 Golang 项目，使用 gitlab ci 来发布，通过 gitlab runner 调用 docker-compose 来打包，但是在构建时失败了。
@@ -77,7 +97,9 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-21T14:42:19&#43;08:00">2021-08-21</time></div></div>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-21T14:42:19&#43;08:00">2021-08-21</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+</div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
 		<p>我平常有一个习惯，就是不断看以前写的代码，想着有没有哪些方面可以改进，如果每天能把代码可读性量变​ 1%，那么日积月累就是质变：前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！</p>
@@ -93,7 +115,9 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-19T15:57:16&#43;08:00">2021-08-19</time></div></div>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-19T15:57:16&#43;08:00">2021-08-19</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+</div></div>
 	</header>
 	<div class="content list__excerpt post__content clearfix">
 		<p>如果你不了解 Makefile 的话，那么推荐看看阮一峰的文章「<a href="https://www.ruanyifeng.com/blog/2015/02/make.html">Make 命令教程</a>」。本文通过一个重构的例子带你写出味道更好的 Makefile，让我们开始吧！</p>
@@ -109,7 +133,7 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
 </div>
 <div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-16T16:16:16&#43;08:00">2021-08-16</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/" rel="category">架构技术</a>
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-16T16:16:16&#43;08:00">2021-08-16</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
 	</span>
 </div></div>
 	</header>
@@ -117,22 +141,6 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 		<p>最近一直在开发某个 OCR 项目：底层用的是 ABBYY 提供的 FineReader 引擎，应用层把 FineReader 包装成 gRPC 对外提供服务，因为 FineReader 项目是 C++ 实现的，而我们团队使用的编程语言是 Golang，所以二者间通过 CGO 来完成交互。整个项目没有特殊的需求，只是鉴于 OCR 耗时较长，为了提升产品体验，要求在处理过程中：客户端可以主动退出；服务端能够实时返回已处理百分比。下面是根据需求画出来的流程图：</p>
 <p><img src="https://blog.huoding.com/wp-content/uploads/2021/08/flow.png" alt="流程图"></p>
 <p>看上去很简单，不过我还是遇到不少问题，虽然这些问题主要都是一些细枝末节，基本上和 OCR 没什么关系，但是对别的项目还是会有所帮助的，下面让我一一道来。</p>
-	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/grpc/" rel="bookmark">
-			浅谈K8S下gRPC负载均衡问题
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-07-14T18:17:05&#43;08:00">2021-07-14</time></div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>一般来说，在 K8S 下部署服务是很简单的事儿，但是如果部署的是一个 gRPC 服务的话，那么稍不留神就可能掉坑里，个中缘由，且听我慢慢道来。</p>
 	</div>
 </article>
 </main>
@@ -165,12 +173,16 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 				<span class="widget__counter widget__counter--bubble">2</span>
 				</li>
 			<li class="widget__item">
+				<a class="widget__link" href="/categories/%E5%AE%9E%E6%88%98/">实战</a>&nbsp;
+				<span class="widget__counter widget__counter--bubble">8</span>
+				</li>
+			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a>&nbsp;
 				<span class="widget__counter widget__counter--bubble">1</span>
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9E%B6%E6%9E%84%E6%8A%80%E6%9C%AF/">架构技术</a>&nbsp;
-				<span class="widget__counter widget__counter--bubble">6</span>
+				<span class="widget__counter widget__counter--bubble">4</span>
 				</li>
 		</ul>
 	</div>
@@ -179,11 +191,11 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/select/">一个select死锁问题</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/private/">在docker环境导入私有仓库的问题</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/makefile2/">记又一次对Makefile的重构</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/makefile/">记一次对Makefile的重构</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/ocr/">关于OCR项目的流水账</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/grpc/">浅谈K8S下gRPC负载均衡问题</a></li>
 		</ul>
 	</div>
 </div>

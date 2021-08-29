@@ -3,7 +3,7 @@ title: "关于OCR项目的流水账"
 date: 2021-08-16T16:16:16+08:00
 draft: false
 categories:
-  - "架构技术"
+  - "实战"
 
 #Comment
 gitment: true

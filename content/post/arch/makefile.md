@@ -2,6 +2,8 @@
 title: "记一次对Makefile的重构"
 date: 2021-08-19T15:57:16+08:00
 draft: false
+categories:
+  - "实战"
 
 #Comment
 gitment: true
