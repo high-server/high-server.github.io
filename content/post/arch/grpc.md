@@ -7,10 +7,10 @@ categories:
 
 #Comment
 gitment: true
+description: "一般来说，在 K8S 下部署服务是很简单的事儿，但是如果部署的是一个 gRPC 服务的话，那么稍不留神就可能掉坑里，个中缘由，且听我慢慢道来。"
 ---
 
 一般来说，在 K8S 下部署服务是很简单的事儿，但是如果部署的是一个 gRPC 服务的话，那么稍不留神就可能掉坑里，个中缘由，且听我慢慢道来。
-
 <!--more-->
 
 在 K8S 下部署服务，缺省情况下会被分配一个地址（也就是 [ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/)），客户端的请求会发送给它，然后再通过负载均衡转发给后端某个 pod：

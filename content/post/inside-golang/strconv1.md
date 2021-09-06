@@ -11,6 +11,7 @@ gitment: true
 #lead: "大家好，我们是搜狗商业技术团队！" # Lead text
 #comments: false # Enable Disqus comments for specific page
 authorbox: true # Enable authorbox for specific page
+description: "Atoi,Itoa函数实现 go语言常见类型转换"
 ---
 Atoi/Itoa函数实现
 <!--more-->

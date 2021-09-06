@@ -7,6 +7,8 @@ categories:
 
 #Comment
 gitment: true
+
+description: "某项目要集成 PDF 文件的 OCR 功能，不过由于此功能技术难度太大，网络上找不到靠谱的开源实现，最终不得不选择 [ABBYY FineReader Engine](https://www.abbyy.com/ocr-sdk/) 的付费服务。可惜 ABBYY 只提供了 C++ 和 Java 两种编程语言的 SDK，而我们的项目采用的编程语言是 Golang，此时通常的集成方法是使用 C++ 或 Java 实现一个服务，然后在 Golang 项目里通过 RPC 调用服务，不过如此一来明显增加了系统的复杂度，好在 Golang 支持 CGO，让我们可以很方便的在 Golang 中使用 C 模块，本文总结了我在学习 CGO 过程中的心得体会。"
 ---
 
 某项目要集成 PDF 文件的 OCR 功能，不过由于此功能技术难度太大，网络上找不到靠谱的开源实现，最终不得不选择 [ABBYY FineReader Engine](https://www.abbyy.com/ocr-sdk/) 的付费服务。可惜 ABBYY 只提供了 C++ 和 Java 两种编程语言的 SDK，而我们的项目采用的编程语言是 Golang，此时通常的集成方法是使用 C++ 或 Java 实现一个服务，然后在 Golang 项目里通过 RPC 调用服务，不过如此一来明显增加了系统的复杂度，好在 Golang 支持 CGO，让我们可以很方便的在 Golang 中使用 C 模块，本文总结了我在学习 CGO 过程中的心得体会。
