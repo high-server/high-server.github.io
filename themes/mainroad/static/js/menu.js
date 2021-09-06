@@ -14,12 +14,20 @@
 		);
 	}
 
-	function removeMenuTransition() {
+    function removeMenuTransition() {
 		this.classList.remove('menu__list--transition');
 	}
 
 	if (menuBtn && menu) {
 		menuBtn.addEventListener('click', toggleMenu, false);
-		menu.addEventListener('transitionend', removeMenuTransition, false);
-	}
+        menu.addEventListener('transitionend', removeMenuTransition, false);
+    }
+    if (document.getElementsByClassName("widget-categories").length) {
+        let list = document.getElementsByClassName('meta__item-categories')
+        for( var i in list ) {
+            let childDom = document.getElementById('busuanzi_container_page_pv')
+            list[i].removeChild(childDom)
+        }
+    }
+    
 }(document, window));
