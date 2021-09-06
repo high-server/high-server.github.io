@@ -7,7 +7,7 @@
 	<title>{{ block "title" . }}{{ if not .IsHome }}{{ .Title }} - {{ end }}{{ .Site.Title }}{{ end }}</title>
 	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
     <meta name="keywords"  content="golang,架构技术漫谈,架构,搜狗,浏览器"/>
-	<meta name="description" content="{{ if .IsHome }}{{ .Site.Params.description }}{{ else }}{{ .Params.Description }}{{ end }}">
+	<meta name="description" content="提高单机性能，用好多机架构！{{ if .IsHome }}{{ .Site.Params.description }}{{ else }}{{ .Params.Description }}{{ end }}">
 	{{- if .Site.Params.opengraph }}
 		{{ template "_internal/opengraph.html" . }}
 	{{- end }}
