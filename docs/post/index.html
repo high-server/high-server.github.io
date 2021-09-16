@@ -50,6 +50,28 @@
 	</header><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/arch/tars/" rel="bookmark">
+			手把手教你用TARS
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-09-16T17:14:16&#43;08:00">2021-09-16</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		在中国，有一个简单的方法可以用来判断一个互联网公司够不够大，那就是看其是否开源过 rpc 框架！比如阿里巴巴的 dubbo，或者腾讯的 tars，小公司往往会对这些大公司的产品趋之若鹜，不过一个可悲的现实是大公司自己往往并不用他们开源的版本，这就好比皇帝总是把自己看不上眼的女人赏赐给臣民，不过能得到皇帝的赏赐总是好事，下面让我手把手教你用 tars，更具体的说是 tarsgo，也就是 tars 的 golang 实现。
+实际动手前，最好熟读官方文档，特别是基础概念和基础通讯协议部分，假设你已经了解了这些内容，那么不妨让我们虚拟一个例子：给商城里的用户加积分！然后我们要构建一个 Shop（App），其中有一个 User（Server），其中有一个 Credit（Servant），可以简单的把 App、Server、Servant 这些概念理解成命名空间的几个层级，下面让我们用 tarsgo 内置的 create_tars_server_gomod.sh 脚本来生成项目！
+shell&gt; export GOPATH=$(go env GOPATH) shell&gt; go env -w GO111MODULE=auto shell&gt; go get -u github.com/TarsCloud/TarsGo/tars shell&gt; $GOPATH/src/github.com/TarsCloud/TarsGo/tars/tools/create_tars_server_gomod.sh Shop User Credit foo 因为 tarsgo 依赖 GOPATH 和 GO111MODULE，所以务必按照上面的步骤来操作，完成后会生成一个名为 User 的目录，其中的大概内容如下：
+shell&gt; tree ./User ./User ├── Credit.tars ├── Credit_imp.go ├── client │ └── client.go ├── config.conf ├── debugtool │ └── dumpstack.go ├── go.
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/select/" rel="bookmark">
 			一个select死锁问题
 			</a>
@@ -131,27 +153,6 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 	<div class="content list__excerpt post__content clearfix">
 		<p>如果你不了解 Makefile 的话，那么推荐看看阮一峰的文章「<a href="https://www.ruanyifeng.com/blog/2015/02/make.html">Make 命令教程</a>」。本文通过一个重构的例子带你写出味道更好的 Makefile，让我们开始吧！</p>
 	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/ocr/" rel="bookmark">
-			关于OCR项目的流水账
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-16T16:16:16&#43;08:00">2021-08-16</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
-	</span>
-    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>最近一直在开发某个 OCR 项目：底层用的是 ABBYY 提供的 FineReader 引擎，应用层把 FineReader 包装成 gRPC 对外提供服务，因为 FineReader 项目是 C++ 实现的，而我们团队使用的编程语言是 Golang，所以二者间通过 CGO 来完成交互。整个项目没有特殊的需求，只是鉴于 OCR 耗时较长，为了提升产品体验，要求在处理过程中：客户端可以主动退出；服务端能够实时返回已处理百分比。下面是根据需求画出来的流程图：</p>
-<p><img src="https://blog.huoding.com/wp-content/uploads/2021/08/flow.png" alt="流程图"></p>
-<p>看上去很简单，不过我还是遇到不少问题，虽然这些问题主要都是一些细枝末节，基本上和 OCR 没什么关系，但是对别的项目还是会有所帮助的，下面让我一一道来。</p>
-	</div>
 </article>
 </main>
 
@@ -185,7 +186,7 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E5%AE%9E%E6%88%98/">实战</a>&nbsp;
-				<span class="widget__counter widget__counter--bubble">8</span>
+				<span class="widget__counter widget__counter--bubble">9</span>
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a>&nbsp;
@@ -202,11 +203,11 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/tars/">手把手教你用TARS</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/select/">一个select死锁问题</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/private/">在docker环境导入私有仓库的问题</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/makefile2/">记又一次对Makefile的重构</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/makefile/">记一次对Makefile的重构</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/ocr/">关于OCR项目的流水账</a></li>
 		</ul>
 	</div>
 </div>

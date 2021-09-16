@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>手把手教你用TARS - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+    <meta name="keywords"  content="golang,架构技术漫谈,架构,搜狗,浏览器"/>
+	<meta name="description" content="提高单机性能，用好多机架构！">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">手把手教你用TARS</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-09-16T17:14:16&#43;08:00">2021-09-16</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>在中国，有一个简单的方法可以用来判断一个互联网公司够不够大，那就是看其是否开源过 rpc 框架！比如阿里巴巴的 <a href="https://github.com/apache/dubbo">dubbo</a>，或者腾讯的 <a href="https://github.com/TarsCloud/Tars">tars</a>，小公司往往会对这些大公司的产品趋之若鹜，不过一个可悲的现实是大公司自己往往并不用他们开源的版本，这就好比皇帝总是把自己看不上眼的女人赏赐给臣民，不过能得到皇帝的赏赐总是好事，下面让我手把手教你用 tars，更具体的说是 <a href="https://github.com/TarsCloud/TarsGo">tarsgo</a>，也就是 tars 的 golang 实现。</p>
+<p>实际动手前，最好熟读<a href="https://github.com/TarsCloud/TarsDocs/blob/master/SUMMARY.md">官方文档</a>，特别是<a href="https://github.com/TarsCloud/TarsDocs/blob/master/base/tars-concept.md">基础概念</a>和<a href="https://github.com/TarsCloud/TarsDocs/blob/master/base/tars-protocol.md">基础通讯协议</a>部分，假设你已经了解了这些内容，那么不妨让我们虚拟一个例子：给商城里的用户加积分！然后我们要构建一个 Shop（App），其中有一个 User（Server），其中有一个 Credit（Servant），可以简单的把 App、Server、Servant 这些概念理解成命名空间的几个层级，下面让我们用 tarsgo 内置的 create_tars_server_gomod.sh 脚本来生成项目！</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; export GOPATH<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>go env GOPATH<span style="color:#66d9ef">)</span>
+shell&gt; go env -w GO111MODULE<span style="color:#f92672">=</span>auto
+shell&gt; go get -u github.com/TarsCloud/TarsGo/tars
+shell&gt; $GOPATH/src/github.com/TarsCloud/TarsGo/tars/tools/create_tars_server_gomod.sh Shop User Credit foo
+</code></pre></div><p>因为 tarsgo 依赖 GOPATH 和 GO111MODULE，所以务必按照上面的步骤来操作，完成后会生成一个名为 User 的目录，其中的大概内容如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; tree ./User
+./User
+├── Credit.tars
+├── Credit_imp.go
+├── client
+│   └── client.go
+├── config.conf
+├── debugtool
+│   └── dumpstack.go
+├── go.mod
+├── main.go
+├── makefile
+└── start.sh
+</code></pre></div><p>编辑 Credit.tars 文件，定义好我们加积分的 Add 方法：</p>
+<pre><code>module Shop
+{
+    interface Credit
+    {
+        int Add(int a,int b,out int c); // Some example function
+    };
+};
+</code></pre><p>接下来就可以通过 tars 文件来生成 golang 文件了（其中调用了 tars2go 工具）：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; cd User
+shell&gt; go mod tidy
+shell&gt; make TARSBUILD
+</code></pre></div><p>文件生成好之后，编辑 Credit_imp.go 文件，加入我们的业务逻辑：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">imp</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">CreditImp</span>) <span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">ctx</span> <span style="color:#a6e22e">context</span>.<span style="color:#a6e22e">Context</span>, <span style="color:#a6e22e">a</span> <span style="color:#66d9ef">int32</span>, <span style="color:#a6e22e">b</span> <span style="color:#66d9ef">int32</span>, <span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">int32</span>) (<span style="color:#66d9ef">int32</span>, <span style="color:#66d9ef">error</span>) {
+	<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;call add&#34;</span>)
+	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">100</span>, <span style="color:#66d9ef">nil</span>
+}
+</code></pre></div><p>编译服务端和客户端代码，运行就能看到效果了：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; go build -o user_server
+shell&gt; go build -o user_client ./client/client.go
+shell&gt; ./user_server -config config.conf
+shell&gt; ./user_client
+</code></pre></div><p>BTW：缺省生成的客户端代码 client.go 导入的包路径不正确，需要手动调整一下。</p>
+<p>总结一下，tarsgo 的开发过程比较简单，基本上就是：编写 tars 文件；用 tars2go 生成代码；实现业务逻辑。当然了，实际部署的时候会有一个管理平台，服务治理等复杂的问题都隐藏在平台里，这些细节就不是本文所考虑的了，再见。</p>
+
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/select/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">一个select死锁问题</p>
+		</a>
+	</div>
+</nav>
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: 'post\/arch\/tars.md',
+    owner: 'yanfeizhang',
+    repo: 'high-server-comment',
+    oauth: {
+      client_id: '69bf4ae3976e5ed0ed12',
+      client_secret: 'a5c66b306f869636e2ac3d725ff424408f761964',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+
+			</div>
+			
+
+		</div>
+		<footer class="footer">
+  <div>
+    <span id="busuanzi_container_site_uv">本站总访问量<span id="busuanzi_value_site_uv"></span>次</span>
+  </div>   
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>
