@@ -11,6 +11,8 @@ gitment: true
 
 在中国，有一个简单的方法可以用来判断一个互联网公司够不够大，那就是看其是否开源过 rpc 框架！比如阿里巴巴的 [dubbo](https://github.com/apache/dubbo)，或者腾讯的 [tars](https://github.com/TarsCloud/Tars)，小公司往往会对这些大公司的产品趋之若鹜，不过一个可悲的现实是大公司自己往往并不用他们开源的版本，这就好比皇帝总是把自己看不上眼的女人赏赐给臣民，不过能得到皇帝的赏赐总是好事，下面让我手把手教你用 tars，更具体的说是 [tarsgo](https://github.com/TarsCloud/TarsGo)，也就是 tars 的 golang 实现。
 
+<!--more-->
+
 实际动手前，最好熟读[官方文档](https://github.com/TarsCloud/TarsDocs/blob/master/SUMMARY.md)，特别是[基础概念](https://github.com/TarsCloud/TarsDocs/blob/master/base/tars-concept.md)和[基础通讯协议](https://github.com/TarsCloud/TarsDocs/blob/master/base/tars-protocol.md)部分，假设你已经了解了这些内容，那么不妨让我们虚拟一个例子：给商城里的用户加积分！然后我们要构建一个 Shop（App），其中有一个 User（Server），其中有一个 Credit（Servant），可以简单的把 App、Server、Servant 这些概念理解成命名空间的几个层级，下面让我们用 tarsgo 内置的 create_tars_server_gomod.sh 脚本来生成项目！
 
 ```shell
