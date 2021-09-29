@@ -6,7 +6,24 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 16 Sep 2021 17:14:16 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 29 Sep 2021 10:42:31 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>浅谈Golang内存对齐</title>
+      <link>https://high-server.github.io/post/arch/align/</link>
+      <pubDate>Wed, 29 Sep 2021 10:42:31 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/align/</guid>
+      <description>&lt;p&gt;如果你在 &lt;a href=&#34;https://golang.org/ref/spec&#34;&gt;golang spec&lt;/a&gt; 里以「alignment」为关键字搜索的话，那么会发现与此相关的内容并不多，只是在结尾介绍 unsafe 包的时候提了一下，不过别忘了字儿越少事儿越大：&lt;/p&gt;
+&lt;p&gt;Computer architectures may require memory addresses to be aligned; that is, for addresses of a variable to be a multiple of a factor, the variable’s type’s alignment. The function Alignof takes an expression denoting a variable of any type and returns the alignment of the (type of the) variable in bytes. For a variable x:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;uintptr(&lt;span style=&#34;color:#a6e22e&#34;&gt;unsafe&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt;)) &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;unsafe&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Alignof&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The following minimal alignment properties are guaranteed:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;For a variable x of any type: unsafe.Alignof(x) is at least 1.&lt;/li&gt;
+&lt;li&gt;For a variable x of struct type: unsafe.Alignof(x) is the largest of all the values unsafe.Alignof(x.f) for each field f of x, but at least 1.&lt;/li&gt;
+&lt;li&gt;For a variable x of array type: unsafe.Alignof(x) is the same as the alignment of a variable of the array’s element type.&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
     <item>
       <title>手把手教你用TARS</title>
       <link>https://high-server.github.io/post/arch/tars/</link>

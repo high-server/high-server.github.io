@@ -49,6 +49,33 @@
 	<article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/arch/align/" rel="bookmark">
+			浅谈Golang内存对齐
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-09-29T10:42:31&#43;08:00">2021-09-29</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		<p>如果你在 <a href="https://golang.org/ref/spec">golang spec</a> 里以「alignment」为关键字搜索的话，那么会发现与此相关的内容并不多，只是在结尾介绍 unsafe 包的时候提了一下，不过别忘了字儿越少事儿越大：</p>
+<p>Computer architectures may require memory addresses to be aligned; that is, for addresses of a variable to be a multiple of a factor, the variable’s type’s alignment. The function Alignof takes an expression denoting a variable of any type and returns the alignment of the (type of the) variable in bytes. For a variable x:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang">uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">x</span>)) <span style="color:#f92672">%</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Alignof</span>(<span style="color:#a6e22e">x</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>
+</code></pre></div><p>The following minimal alignment properties are guaranteed:</p>
+<ul>
+<li>For a variable x of any type: unsafe.Alignof(x) is at least 1.</li>
+<li>For a variable x of struct type: unsafe.Alignof(x) is the largest of all the values unsafe.Alignof(x.f) for each field f of x, but at least 1.</li>
+<li>For a variable x of array type: unsafe.Alignof(x) is the same as the alignment of a variable of the array’s element type.</li>
+</ul>
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/tars/" rel="bookmark">
 			手把手教你用TARS
 			</a>
@@ -130,25 +157,6 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 	<div class="content list__excerpt post__content clearfix">
 		<p>我平常有一个习惯，就是不断看以前写的代码，想着有没有哪些方面可以改进，如果每天能把代码可读性量变​ 1%，那么日积月累就是质变：前些天我们写过一次对 Makefile 的重构，去掉了一处重复代码的坏味道，没过多久我便又发现了一处重复代码的坏味道，本文就让我们看看如何消灭它！</p>
 	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/makefile/" rel="bookmark">
-			记一次对Makefile的重构
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-19T15:57:16&#43;08:00">2021-08-19</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
-	</span>
-    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>如果你不了解 Makefile 的话，那么推荐看看阮一峰的文章「<a href="https://www.ruanyifeng.com/blog/2015/02/make.html">Make 命令教程</a>」。本文通过一个重构的例子带你写出味道更好的 Makefile，让我们开始吧！</p>
-	</div>
 </article>
 </main>
 
@@ -181,7 +189,7 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E5%AE%9E%E6%88%98/">实战</a>&nbsp;
-				<span class="widget__counter widget__counter--bubble">9</span>
+				<span class="widget__counter widget__counter--bubble">10</span>
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a>&nbsp;
@@ -198,11 +206,11 @@ FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/align/">浅谈Golang内存对齐</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/tars/">手把手教你用TARS</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/select/">一个select死锁问题</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/private/">在docker环境导入私有仓库的问题</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/makefile2/">记又一次对Makefile的重构</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/makefile/">记一次对Makefile的重构</a></li>
 		</ul>
 	</div>
 </div>

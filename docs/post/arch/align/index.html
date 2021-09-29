@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>浅谈Golang内存对齐 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+    <meta name="keywords"  content="golang,架构技术漫谈,架构,搜狗,浏览器"/>
+	<meta name="description" content="提高单机性能，用好多机架构！">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">浅谈Golang内存对齐</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-09-29T10:42:31&#43;08:00">2021-09-29</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>如果你在 <a href="https://golang.org/ref/spec">golang spec</a> 里以「alignment」为关键字搜索的话，那么会发现与此相关的内容并不多，只是在结尾介绍 unsafe 包的时候提了一下，不过别忘了字儿越少事儿越大：</p>
+<p>Computer architectures may require memory addresses to be aligned; that is, for addresses of a variable to be a multiple of a factor, the variable’s type’s alignment. The function Alignof takes an expression denoting a variable of any type and returns the alignment of the (type of the) variable in bytes. For a variable x:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang">uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">x</span>)) <span style="color:#f92672">%</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Alignof</span>(<span style="color:#a6e22e">x</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>
+</code></pre></div><p>The following minimal alignment properties are guaranteed:</p>
+<ul>
+<li>For a variable x of any type: unsafe.Alignof(x) is at least 1.</li>
+<li>For a variable x of struct type: unsafe.Alignof(x) is the largest of all the values unsafe.Alignof(x.f) for each field f of x, but at least 1.</li>
+<li>For a variable x of array type: unsafe.Alignof(x) is the same as the alignment of a variable of the array’s element type.</li>
+</ul>
+<p>当然，如果你以前没有接触过内存对齐的话，那么对你来说上面的内容可能过于言简意赅，在继续学习之前我建议你阅读以下资料，有助于消化理解：</p>
+<ul>
+<li><a href="http://blog.newbmiao.com/slides/%E5%9B%BE%E8%A7%A3Go%E4%B9%8B%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90.pdf">图解 Go 之内存对齐</a></li>
+<li><a href="https://eddycjy.gitbook.io/golang/di-1-ke-za-tan/go-memory-align">在 Go 中恰到好处的内存对齐</a></li>
+<li><a href="https://www.liwenzhou.com/posts/Go/struct_memory_layout/">Go 结构体的内存布局</a></li>
+<li><a href="https://ms2008.github.io/2019/08/01/golang-memory-alignment/">Golang 是否有必要内存对齐</a></li>
+</ul>
+<h2 id="测试">测试</h2>
+<p>我构造了一个 struct，它有一个特征：字段按照一小一大的顺序排列，如果不看注释中的 Sizeof、Alignof、Offsetof 信息（通过 unsafe 获取），你能否说出它占用多少个字节？</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+	<span style="color:#e6db74">&#34;unsafe&#34;</span>
+)
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">memAlign</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">a</span> <span style="color:#66d9ef">byte</span>     <span style="color:#75715e">// Sizeof: 1  Alignof: 1 Offsetof: 0
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">b</span> <span style="color:#66d9ef">int</span>      <span style="color:#75715e">// Sizeof: 8  Alignof: 8 Offsetof: 8
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">c</span> <span style="color:#66d9ef">byte</span>     <span style="color:#75715e">// Sizeof: 1  Alignof: 1 Offsetof: 16
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">d</span> <span style="color:#66d9ef">string</span>   <span style="color:#75715e">// Sizeof: 16 Alignof: 8 Offsetof: 24
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">e</span> <span style="color:#66d9ef">byte</span>     <span style="color:#75715e">// Sizeof: 1  Alignof: 1 Offsetof: 40
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">f</span> []<span style="color:#66d9ef">string</span> <span style="color:#75715e">// Sizeof: 24 Alignof: 8 Offsetof: 48
+</span><span style="color:#75715e"></span>}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">m</span> <span style="color:#a6e22e">memAlign</span>
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Sizeof</span>(<span style="color:#a6e22e">m</span>))
+}
+</code></pre></div><p>初学者往往会认为 struct 的大小应该等于内部各个字段大小的和，于是得出本例的答案是 51（1+8+1+16+1+24=51），不过实际上答案却是 72！究其原因是因为内存对齐的缘故导致各个字段之间可能存在 padding。那么有没有简单的方法来减少 padding 呢？我们不妨把字段按照从大到小的顺序排列，再试一试：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+	<span style="color:#e6db74">&#34;unsafe&#34;</span>
+)
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">memAlign</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">f</span> []<span style="color:#66d9ef">string</span> <span style="color:#75715e">// Sizeof: 24 Alignof: 8 Offsetof: 0
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">d</span> <span style="color:#66d9ef">string</span>   <span style="color:#75715e">// Sizeof: 16 Alignof: 8 Offsetof: 24
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">b</span> <span style="color:#66d9ef">int</span>      <span style="color:#75715e">// Sizeof: 8  Alignof: 8 Offsetof: 40
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">a</span> <span style="color:#66d9ef">byte</span>     <span style="color:#75715e">// Sizeof: 1  Alignof: 1 Offsetof: 48
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">c</span> <span style="color:#66d9ef">byte</span>     <span style="color:#75715e">// Sizeof: 1  Alignof: 1 Offsetof: 49
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">e</span> <span style="color:#66d9ef">byte</span>     <span style="color:#75715e">// Sizeof: 1  Alignof: 1 Offsetof: 50
+</span><span style="color:#75715e"></span>}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">m</span> <span style="color:#a6e22e">memAlign</span>
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Sizeof</span>(<span style="color:#a6e22e">m</span>))
+}
+</code></pre></div><p>结果答案变成了 56，比 72 小了很多，不过还是比 51 大，说明还是存在 padding，这是因为不仅字段要内存对齐，struct 本身也要内存对齐。</p>
+<p>另：我刚学 golang 的时候一直有一个疑问：为什么切片的大小是 24，字符串的大小是 16 呢？我估计别的初学者也会有类似的问题，一并解释一下，这是因为切片和字符串也是 struct，其定义分别对应 <a href="https://pkg.go.dev/reflect#SliceHeader">SliceHeader</a> 和 <a href="https://pkg.go.dev/reflect#StringHeader">StringHeader</a>，它们的大小分别是 24 和 16：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">SliceHeader</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">Data</span> <span style="color:#66d9ef">uintptr</span>
+	<span style="color:#a6e22e">Len</span>  <span style="color:#66d9ef">int</span>
+	<span style="color:#a6e22e">Cap</span>  <span style="color:#66d9ef">int</span>
+}
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">StringHeader</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">Data</span> <span style="color:#66d9ef">uintptr</span>
+	<span style="color:#a6e22e">Len</span>  <span style="color:#66d9ef">int</span>
+}
+</code></pre></div><p>因为 uintptr 的大小等于 int，所以切片的大小等于 3<em>8=24，字符串的大小等于 2</em>8=16。</p>
+<h2 id="工具">工具</h2>
+<p>只要我们写点代码，调用 unsafe 包的 Sizeof、Alignof、Offsetof 等方法，那么就可以搞清楚 struct 内存对齐的各种细节，不过这毕竟是个没有技术含量的体力活，有没有相关工具可以提升我们的工作效率呢？答案是 <a href="https://github.com/dominikh/go-tools">go-tools</a>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; go install honnef.co/go/tools/cmd/structlayout@latest
+shell&gt; go install honnef.co/go/tools/cmd/structlayout-pretty@latest
+shell&gt; go install honnef.co/go/tools/cmd/structlayout-optimize@latest
+</code></pre></div><p>其中，structlayout 是用来分析数据的，pretty 是用来图形化显示的，optimize 是用来优化建议的，这里就用文章开头优化前的代码给出一个 structlayout-pretty 的例子：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; structlayout -json ./main.go memAlign | structlayout-pretty
+</code></pre></div><p><img src="https://blog.huoding.com/wp-content/uploads/2021/09/structlayout-pretty.png" alt="structlayout-pretty"></p>
+<p>虽然 structlayout-pretty 我们可以很直观的看到在哪里存在 padding，不过它是 ascii 风格的，有时候不太方便，此时另外一个图形化工具 <a href="https://github.com/ajstarks/svgo/tree/master/structlayout-svg">structlayout-svg</a> 更爽：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; go install github.com/ajstarks/svgo/structlayout-svg@latest
+</code></pre></div><p>把文章开头优化前后的代码分别用 structlayout-svg 生成结果：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; structlayout -json ./main.go memAlign | structlayout-svg
+</code></pre></div><p>优化前：</p>
+<p><img src="https://blog.huoding.com/wp-content/uploads/2021/09/before.png" alt="优化前"></p>
+<p>优化后：</p>
+<p><img src="https://blog.huoding.com/wp-content/uploads/2021/09/after.png" alt="优化后"></p>
+<p>效果超赞是不是！不过如果我们要把工具集成到 CI 里，那么此类图形化工具就不合适了，好在我们的工具箱里还有宝贝，它就是 <a href="https://github.com/golang/tools/blob/master/gopls/doc/analyzers.md#fieldalignment">fieldalignment</a>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; go install golang.org/x/tools/...@latest
+</code></pre></div><p>把文章开头优化前后的代码分别用 fieldalignment 生成结果：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; awk <span style="color:#e6db74">&#39;$1 == &#34;module&#34; {print $2}&#39;</span> ./go.mod | xargs fieldalignment
+</code></pre></div><p>优化前：struct of size 72 could be 56；优化后：struct with 32 pointer bytes could be 24。</p>
+<p>如上可见，fieldalignment 准确判断出优化前代码的 struct size 存在优化空间；但是优化后代码的 pointer bytes 是什么鬼？按照文档中的说明，pointer bytes 的含义如下：</p>
+<p>Pointer bytes is how many bytes of the object that the garbage collector has to potentially scan for pointers, for example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">struct</span> { <span style="color:#66d9ef">uint32</span>; <span style="color:#66d9ef">string</span> }
+</code></pre></div><p>have 16 pointer bytes because the garbage collector has to scan up through the string’s inner pointer.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">struct</span> { <span style="color:#66d9ef">string</span>; <span style="color:#f92672">*</span><span style="color:#66d9ef">uint32</span> }
+</code></pre></div><p>has 24 pointer bytes because it has to scan further through the *uint32.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">struct</span> { <span style="color:#66d9ef">string</span>; <span style="color:#66d9ef">uint32</span> }
+</code></pre></div><p>has 8 because it can stop immediately after the string pointer.</p>
+<p>看到这里，不禁让人产生疑惑：GC 不会这么傻吧，难道它还要一个字节一个字节的扫描内存么？让我们做个实验测试一下 pointer bytes 有没有影响，正所谓有病没病走两步：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;runtime&#34;</span>
+	<span style="color:#e6db74">&#34;time&#34;</span>
+)
+
+<span style="color:#75715e">// pointer bytes: 8
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">foo</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">S</span> <span style="color:#66d9ef">string</span>
+	<span style="color:#a6e22e">U</span> <span style="color:#66d9ef">uint32</span>
+}
+
+<span style="color:#75715e">// pointer bytes: 16
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">bar</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">U</span> <span style="color:#66d9ef">uint32</span>
+	<span style="color:#a6e22e">S</span> <span style="color:#66d9ef">string</span>
+}
+
+<span style="color:#75715e">// GODEBUG=gctrace=1 go run main.go
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">v</span> <span style="color:#f92672">:=</span> make([]<span style="color:#a6e22e">foo</span>, <span style="color:#ae81ff">1e8</span>)
+	<span style="color:#75715e">// v := make([]bar, 1e8)
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">for</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Tick</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>) {
+		<span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">GC</span>()
+	}
+	<span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">KeepAlive</span>(<span style="color:#a6e22e">v</span>)
+}
+</code></pre></div><p>代码里构造了一个巨大的切片变量，栈必然保存不了，于是变量会逃逸到堆，接着周期性的调用 runtime.GC 来手动触发 GC，然后执行的时候通过 GODEBUG=gctrace=1 获取实时的 GC 相关信息。结果显示，不管是小 pointer bytes 的 foo，还是大 pointer bytes 的 bar，最终 GC 消耗的时间差不多。换句话说，pointer bytes 的大小对 GC 的影响很小很小，在 golang 的相关 <a href="https://github.com/golang/go/issues/44877#issuecomment-794565908">issue</a> 的讨论中，也能印证此结论，篇幅所限，这里就不多说了。</p>
+<p>另：命令输出的 gctrace 信息比较多，相关格式说明可以参考 <a href="https://pkg.go.dev/runtime">runtime</a> 中的注释信息。</p>
+<h2 id="例子">例子</h2>
+<p>了解了内存对齐的相关知识后，让我们看看现实世界中的例子，首先是 <a href="https://github.com/golang/groupcache/blob/master/groupcache.go">groupcache</a>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Group</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>
+	<span style="color:#a6e22e">getter</span> <span style="color:#a6e22e">Getter</span>
+	<span style="color:#a6e22e">peersOnce</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Once</span>
+	<span style="color:#a6e22e">peers</span> <span style="color:#a6e22e">PeerPicker</span>
+	<span style="color:#a6e22e">cacheBytes</span> <span style="color:#66d9ef">int64</span>
+	<span style="color:#a6e22e">mainCache</span> <span style="color:#a6e22e">cache</span>
+	<span style="color:#a6e22e">hotCache</span> <span style="color:#a6e22e">cache</span>
+	<span style="color:#a6e22e">loadGroup</span> <span style="color:#a6e22e">flightGroup</span>
+	<span style="color:#a6e22e">_</span> <span style="color:#66d9ef">int32</span> <span style="color:#75715e">// force Stats to be 8-byte aligned on 32-bit platforms
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">Stats</span> <span style="color:#a6e22e">Stats</span>
+}
+</code></pre></div><p>通过注释我们可以看到，为了强制让 Stats 在 32 位平台上按 8 字节对齐，在 Stats 字段的前面加了一个「_ int32」，换句话说，就是加了 4 个字节，那么为什么要这么做？</p>
+<p>原因是 Stats 字段要参与 atomic 原子运算，关于 <a href="https://pkg.go.dev/sync/atomic">atomic</a>，文档最后记录了如下内容：</p>
+<blockquote>
+<p>On ARM, 386, and 32-bit MIPS, it is the caller’s responsibility to arrange for 64-bit alignment of 64-bit words accessed atomically. The first word in a variable or in an allocated struct, array, or slice can be relied upon to be 64-bit aligned.</p>
+</blockquote>
+<p>也就是说，在 32 位平台，调用者有责任自己保证原子操作是 64 位对齐的，此外，struct 中第一个字段可以被认为是 64 位对齐的。在本例中，因为 Stats 字段要参与 atomic 运算，而且不是第一个字段，所以我们必须手动保证它是 64 位对齐的，不过加了 _ int32 就能保证是 64 位对齐的么？让我们写代码验证一下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+	<span style="color:#e6db74">&#34;unsafe&#34;</span>
+
+	<span style="color:#e6db74">&#34;github.com/golang/groupcache&#34;</span>
+)
+
+<span style="color:#75715e">// GOARCH=386 go run main.go
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">g</span> <span style="color:#a6e22e">groupcache</span>.<span style="color:#a6e22e">Group</span>
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Offsetof</span>(<span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">Stats</span>))
+}
+</code></pre></div><p>结果显示在 32 位下运行，Stats 的 offset 是 176，是 8 的倍数，满足 64 位对齐。如果没有「_ int32」做 padding，那么 Stats 的 offset 将是 172，就不再是 8 的倍数了。</p>
+<p>…</p>
+<p>再看看 sync.WaitGroup 中内存对齐的例子：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">WaitGroup</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">noCopy</span> <span style="color:#a6e22e">noCopy</span>
+
+	<span style="color:#75715e">// 64-bit value: high 32 bits are counter, low 32 bits are waiter count.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// 64-bit atomic operations require 64-bit alignment, but 32-bit
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// compilers do not ensure it. So we allocate 12 bytes and then use
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// the aligned 8 bytes in them as state, and the other 4 as storage
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// for the sema.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">state1</span> [<span style="color:#ae81ff">3</span>]<span style="color:#66d9ef">uint32</span>
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">wg</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">WaitGroup</span>) <span style="color:#a6e22e">state</span>() (<span style="color:#a6e22e">statep</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">uint64</span>, <span style="color:#a6e22e">semap</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">uint32</span>) {
+	<span style="color:#66d9ef">if</span> uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>))<span style="color:#f92672">%</span><span style="color:#ae81ff">8</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> {
+		<span style="color:#66d9ef">return</span> (<span style="color:#f92672">*</span><span style="color:#66d9ef">uint64</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>)), <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>[<span style="color:#ae81ff">2</span>]
+	} <span style="color:#66d9ef">else</span> {
+		<span style="color:#66d9ef">return</span> (<span style="color:#f92672">*</span><span style="color:#66d9ef">uint64</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>[<span style="color:#ae81ff">1</span>])), <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>[<span style="color:#ae81ff">0</span>]
+	}
+}
+</code></pre></div><p>首先，noCopy 是什么鬼，其实它的作用就像名字一样，它是如何实现的呢，看注释：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// noCopy may be embedded into structs which must not be copied
+</span><span style="color:#75715e">// after the first use.
+</span><span style="color:#75715e">//
+</span><span style="color:#75715e">// See https://golang.org/issues/8005#issuecomment-190753527
+</span><span style="color:#75715e">// for details.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">noCopy</span> <span style="color:#66d9ef">struct</span>{}
+
+<span style="color:#75715e">// Lock is a no-op used by -copylocks checker from `go vet`.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#f92672">*</span><span style="color:#a6e22e">noCopy</span>) <span style="color:#a6e22e">Lock</span>()   {}
+<span style="color:#66d9ef">func</span> (<span style="color:#f92672">*</span><span style="color:#a6e22e">noCopy</span>) <span style="color:#a6e22e">Unlock</span>() {}
+</code></pre></div><p>实际上它只是起到标识的作用，以便 go vet 能够借此发现问题，详细说明在 <a href="https://github.com/golang/go/issues/8005#issuecomment-190753527">issue</a> 中有描述，如果你在自己的项目里有类似 noCopy 的需求，那么也可以照猫画虎，</p>
+<p>接下来是内存对齐相关的重头戏了，state1 字段是一个有 3 个元素的 uint32 数组，它会保存两种数据，分别是 statep 和 semap，其中，statep 要参与 atomic 运算，所以我们要保证它是 64 位对齐的。如果「uintptr(unsafe.Pointer(&amp;wg.state1))%8 == 0」成立，那么取前两个 int32 做 statep，否则取后两个 int32 做 statep。</p>
+<p>为什么可以这样做？因为「uintptr(unsafe.Pointer(&amp;wg.state1))%8 == 0」成立的时候，前两个 int32 自然满足 64 位对齐；当「uintptr(unsafe.Pointer(&amp;wg.state1))%8 == 0」不成立的时候， 其运算结果必然等于 4，此时我们正好可以把第一个 int32 当作是一个 4 字节的 padding，于是后两个字节的 int32 就又满足 64 位对齐了。</p>
+<p>如果你认为自己理解了，那么思考一下，在定义 state1 的时候，如果不用 [3]int32，而是换成一个 int64 加上一个 int32，或者是一个 [12]byte，它们都是 12 个字节，是否可以？</p>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/tars/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">手把手教你用TARS</p>
+		</a>
+	</div>
+</nav>
+
+
+
+
+
+			</div>
+			
+
+		</div>
+		<footer class="footer">
+  <div>
+    <span id="busuanzi_container_site_uv">本站总访问量<span id="busuanzi_value_site_uv"></span>次</span>
+  </div>   
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>
