@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>再谈Golang内存对齐 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+    <meta name="keywords"  content="golang,架构技术漫谈,架构,搜狗,浏览器"/>
+	<meta name="description" content="提高单机性能，用好多机架构！">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">再谈Golang内存对齐</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-09-30T10:42:31&#43;08:00">2021-09-30</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>关于 Golang 内存对齐，昨天已经写了一篇「<a href="https://blog.huoding.com/2021/09/29/951">浅谈Golang内存对齐</a>」，可惜对一些细节问题的讨论语焉不详，于是便有了今天这篇「再谈Golang内存对齐」。</p>
+<p>让我们回想一下 <a href="https://github.com/golang/groupcache/blob/master/groupcache.go">groupcache</a> 和 <a href="https://github.com/golang/go/blob/master/src/sync/waitgroup.go">sync.WaitGroup</a> 中的做法，为了规避在 32 位环境下 atomic 操作 64 位数的 BUG，它们采取了截然不同的做法：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// groupcache
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Group</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>
+	<span style="color:#a6e22e">getter</span> <span style="color:#a6e22e">Getter</span>
+	<span style="color:#a6e22e">peersOnce</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Once</span>
+	<span style="color:#a6e22e">peers</span> <span style="color:#a6e22e">PeerPicker</span>
+	<span style="color:#a6e22e">cacheBytes</span> <span style="color:#66d9ef">int64</span>
+	<span style="color:#a6e22e">mainCache</span> <span style="color:#a6e22e">cache</span>
+	<span style="color:#a6e22e">hotCache</span> <span style="color:#a6e22e">cache</span>
+	<span style="color:#a6e22e">loadGroup</span> <span style="color:#a6e22e">flightGroup</span>
+	<span style="color:#a6e22e">_</span> <span style="color:#66d9ef">int32</span> <span style="color:#75715e">// force Stats to be 8-byte aligned on 32-bit platforms
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">Stats</span> <span style="color:#a6e22e">Stats</span>
+}
+
+<span style="color:#75715e">// sync.WaitGroup
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">WaitGroup</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">noCopy</span> <span style="color:#a6e22e">noCopy</span>
+
+	<span style="color:#75715e">// 64-bit value: high 32 bits are counter, low 32 bits are waiter count.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// 64-bit atomic operations require 64-bit alignment, but 32-bit
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// compilers do not ensure it. So we allocate 12 bytes and then use
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// the aligned 8 bytes in them as state, and the other 4 as storage
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// for the sema.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">state1</span> [<span style="color:#ae81ff">3</span>]<span style="color:#66d9ef">uint32</span>
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">wg</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">WaitGroup</span>) <span style="color:#a6e22e">state</span>() (<span style="color:#a6e22e">statep</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">uint64</span>, <span style="color:#a6e22e">semap</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">uint32</span>) {
+	<span style="color:#66d9ef">if</span> uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>))<span style="color:#f92672">%</span><span style="color:#ae81ff">8</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> {
+		<span style="color:#66d9ef">return</span> (<span style="color:#f92672">*</span><span style="color:#66d9ef">uint64</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>)), <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>[<span style="color:#ae81ff">2</span>]
+	} <span style="color:#66d9ef">else</span> {
+		<span style="color:#66d9ef">return</span> (<span style="color:#f92672">*</span><span style="color:#66d9ef">uint64</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>[<span style="color:#ae81ff">1</span>])), <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">state1</span>[<span style="color:#ae81ff">0</span>]
+	}
+}
+</code></pre></div><p><strong>问题：为什么 groupcache 不用考虑外部地址，只要内部对齐就可以实现 64 位对齐？</strong></p>
+<p>为了搞清楚这个问题，让我们回想一下 <a href="https://pkg.go.dev/sync/atomic">atomic</a> 文档最后关于 64 位对齐的相关描述：</p>
+<blockquote>
+<p>On ARM, 386, and 32-bit MIPS, it is the caller’s responsibility to arrange for 64-bit alignment of 64-bit words accessed atomically. The first word in a variable or in an allocated struct, array, or slice can be relied upon to be 64-bit aligned.</p>
+</blockquote>
+<p>其中我们关心的是最后一句话：变量、结构体、数组、切片的第一个字是 64 位对齐的。为了验证这一点，我构造了一个包含 int64 的 struct，看它的地址是否是 8 的倍数：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+	<span style="color:#e6db74">&#34;time&#34;</span>
+	<span style="color:#e6db74">&#34;unsafe&#34;</span>
+)
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">foo</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">bar</span> <span style="color:#66d9ef">int64</span>
+}
+
+<span style="color:#75715e">// GOARCH=386 go run main.go
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#66d9ef">for</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Tick</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>) {
+		<span style="color:#a6e22e">f</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">foo</span>{}
+		<span style="color:#a6e22e">p</span> <span style="color:#f92672">:=</span> uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#a6e22e">f</span>))
+		<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;%p: %d, %d\n&#34;</span>, <span style="color:#a6e22e">f</span>, <span style="color:#a6e22e">p</span>, <span style="color:#a6e22e">p</span><span style="color:#f92672">%</span><span style="color:#ae81ff">8</span>)
+	}
+}
+</code></pre></div><p>按照常理来说，当我们在 32 位环境（GOARCH=386）下运行的时候，struct 的地址应该只能满足 32 位对齐，也就是 4 的倍数，不过测试发现，当 struct 里含有 int64 的时候，struct 的地址竟然满足 64 位对齐，也就是是 8 的倍数。既然外部已经是对齐的了，那么只要内部对齐就可以实现 64 位对齐。</p>
+<p><strong>问题：为什么 sync.WaitGroup 不像 groupcache 那样实现 64 位对齐。</strong></p>
+<p>两者之所以采用了不同的 64 位对齐实现方式，是因为两者的使用场景不同。在实际使用的时候，sync.WaitGroup 可能会被嵌入到别的 struct 中，因为不知道嵌入的具体位置，所以不可能通过预先加入 padding 的方式来实现 64 位对齐，只能在运行时动态计算。而 groupcache 则不会被嵌入到别的 struct 中，如果你硬要嵌入，可能会出问题：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;github.com/golang/groupcache&#34;</span>
+)
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">foo</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">bar</span> <span style="color:#66d9ef">int32</span>
+	<span style="color:#a6e22e">g</span> <span style="color:#a6e22e">groupcache</span>.<span style="color:#a6e22e">Group</span>
+}
+
+<span style="color:#75715e">// GOARCH=386 go run main.go
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">f</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">foo</span>{}
+	<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">Stats</span>.<span style="color:#a6e22e">Gets</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
+}
+</code></pre></div><p>当我们在 32 位环境（GOARCH=386）下运行的时候，会看到如下 panic 信息：</p>
+<blockquote>
+<p>panic: unaligned 64-bit atomic operation</p>
+</blockquote>
+<p>当我们在 32 位环境，按 4 字节对齐，所以 g 的偏移量是 4 而不是 8，如此一来，虽然 groupcache 内部通过 _ int32 实现了相对的 64 位对齐，但是因为外部没有实现 64 位对齐，所以在执行 atomic 操作的时候，还是会 panic（如果 bar 是 int64 就不会 panic）。</p>
+<p><strong>问题：为什么 sync.WaitGroup 中的 state1 不换成 一个 int64 加一个 int32？</strong></p>
+<p>我们知道 sync.WaitGroup 中的 state1 字段是一个有 3 个元素的 uint32 数组，它会保存两种数据，分别是 statep 和 semap，相当于一个是 int64，另一个是 int32。那为什么它不直接把一个 state1 字段替换成两个独立的字段，一个 int64 加一个 int32。</p>
+<p>当然可以换，但是因为 sync.WaitGroup 可能会被嵌入到别的 struct 中，并且不知道嵌入的具体位置，所以还是需要在运行时动态计算是否要 padding，并且这个 padding 的工作要额外空间来承担，不能被独立的 int32 兼任。和原方案比无疑浪费了空间。</p>
+<p><strong>问题：为什么 sync.WaitGroup 中的 state1 不换成 一个[12]byte？</strong></p>
+<p>原方案中 state1 的类型是 [3]uint32，取两个 uint32 做 statep，剩下的一个 uint32 做 semap。为什么不换成 [12]byte，取 8 个 byte 做 statep，剩下的 4 个 byte 做 semap？</p>
+<p>想要搞清楚这个问题，我们想要回顾一下 golang 关于内存对齐保证的描述：</p>
+<ul>
+<li>For a variable x of any type: unsafe.Alignof(x) is at least 1.</li>
+<li>For a variable x of struct type: unsafe.Alignof(x) is the largest of all the values unsafe.Alignof(x.f) for each field f of x, but at least 1.</li>
+<li>For a variable x of array type: unsafe.Alignof(x) is the same as the alignment of a variable of the array’s element type.</li>
+</ul>
+<p>其中的重点是：对 struct 而言，它的对齐取决于其中所有字段对齐的最大值；对于 array 而言，它的对齐等于元素类型本身的对齐。因为 noCopy 的大小是 0，所以 struct 的对齐实际上就取决于 state1 字段的对齐。</p>
+<ul>
+<li>当 state1 的类型是 [3]uint32 的时候，那么 struct 的对齐就是 4。</li>
+<li>当 state1 的类型是 [12]byte 的时候，那么 struct 的对齐就是 1。</li>
+</ul>
+<p>如果 state1 换成 [12]byte，那么因为 struct 的对齐是 1，会导致 struct 的地址不再是 4 的倍数，结果 uintptr(unsafe.Pointer(&amp;wg.state1))%8 == 0 的判断也就没有意义了。</p>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/align/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">浅谈Golang内存对齐</p>
+		</a>
+	</div>
+</nav>
+
+
+
+
+
+			</div>
+			
+
+		</div>
+		<footer class="footer">
+  <div>
+    <span id="busuanzi_container_site_uv">本站总访问量<span id="busuanzi_value_site_uv"></span>次</span>
+  </div>   
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

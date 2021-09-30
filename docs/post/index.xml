@@ -6,7 +6,16 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 29 Sep 2021 10:42:31 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 30 Sep 2021 10:42:31 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>再谈Golang内存对齐</title>
+      <link>https://high-server.github.io/post/arch/align2/</link>
+      <pubDate>Thu, 30 Sep 2021 10:42:31 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/align2/</guid>
+      <description>&lt;p&gt;关于 Golang 内存对齐，昨天已经写了一篇「&lt;a href=&#34;https://blog.huoding.com/2021/09/29/951&#34;&gt;浅谈Golang内存对齐&lt;/a&gt;」，可惜对一些细节问题的讨论语焉不详，于是便有了今天这篇「再谈Golang内存对齐」。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>浅谈Golang内存对齐</title>
       <link>https://high-server.github.io/post/arch/align/</link>
