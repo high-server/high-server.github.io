@@ -6,7 +6,16 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 30 Sep 2021 10:42:31 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 08 Oct 2021 17:09:31 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>为什么会有atomic.LoadInt32</title>
+      <link>https://high-server.github.io/post/arch/atomic/</link>
+      <pubDate>Fri, 08 Oct 2021 17:09:31 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/atomic/</guid>
+      <description>&lt;p&gt;前些天我们聊了 &lt;a href=&#34;https://blog.huoding.com/2021/09/29/951&#34;&gt;Golang 内存对齐&lt;/a&gt;的话题，后来我突然想到另一个问题：为什么会有 &lt;a href=&#34;https://pkg.go.dev/github.com/hslam/atomic#LoadInt32&#34;&gt;atomic.LoadInt32&lt;/a&gt;？可能你觉得思维太跳跃了，容我慢慢道来：首先，有 &lt;a href=&#34;https://pkg.go.dev/github.com/hslam/atomic#LoadInt64&#34;&gt;atomic.LoadInt64&lt;/a&gt; 很正常，因为对一个 int64 来说，它的大小是 8 个字节，如果是 32 位平台的话（字长 4 字节），CPU 一次最多操作 4 个字节，需要两次才能拿到全部数据，所以封装一个 atomic.LoadInt64 来实现原子操作；但是，对一个 int32 数据来说，它的大小是 4 字节，不管是 32 位平台（字长 4 字节），还是 64 位平台（字长 8 字节），CPU 应该都可以保证一次操作拿到数据，换句话说，如果读取一个 int32 数据，那么本身就应该是原子的，可是为什么会有 atomic.LoadInt32，这不是脱了裤子放屁么？&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>再谈Golang内存对齐</title>
       <link>https://high-server.github.io/post/arch/align2/</link>

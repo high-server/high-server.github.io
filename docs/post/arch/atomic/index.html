@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>为什么会有atomic.LoadInt32 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+    <meta name="keywords"  content="golang,架构技术漫谈,架构,搜狗,浏览器"/>
+	<meta name="description" content="提高单机性能，用好多机架构！">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">为什么会有atomic.LoadInt32</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-10-08T17:09:31&#43;08:00">2021-10-08</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>前些天我们聊了 <a href="https://blog.huoding.com/2021/09/29/951">Golang 内存对齐</a>的话题，后来我突然想到另一个问题：为什么会有 <a href="https://pkg.go.dev/github.com/hslam/atomic#LoadInt32">atomic.LoadInt32</a>？可能你觉得思维太跳跃了，容我慢慢道来：首先，有 <a href="https://pkg.go.dev/github.com/hslam/atomic#LoadInt64">atomic.LoadInt64</a> 很正常，因为对一个 int64 来说，它的大小是 8 个字节，如果是 32 位平台的话（字长 4 字节），CPU 一次最多操作 4 个字节，需要两次才能拿到全部数据，所以封装一个 atomic.LoadInt64 来实现原子操作；但是，对一个 int32 数据来说，它的大小是 4 字节，不管是 32 位平台（字长 4 字节），还是 64 位平台（字长 8 字节），CPU 应该都可以保证一次操作拿到数据，换句话说，如果读取一个 int32 数据，那么本身就应该是原子的，可是为什么会有 atomic.LoadInt32，这不是脱了裤子放屁么？</p>
+<p>有病没病走两步，让我们写一段代码来验证一下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;sync/atomic&#34;</span>
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">v</span> = int32(<span style="color:#ae81ff">0</span>)
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">x</span> <span style="color:#66d9ef">int32</span>
+	<span style="color:#a6e22e">x</span> = <span style="color:#a6e22e">v</span> <span style="color:#75715e">// main.go:9
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">x</span>
+	<span style="color:#a6e22e">x</span> = <span style="color:#a6e22e">atomic</span>.<span style="color:#a6e22e">LoadInt32</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">v</span>) <span style="color:#75715e">// main.go:11
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">x</span>
+}
+</code></pre></div><p>通过「go tool compile」运行代码，拿到对应的汇编结果：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; go tool compile -N -l -S main.go
+
+0x0016 <span style="color:#ae81ff">00022</span> <span style="color:#f92672">(</span>main.go:9<span style="color:#f92672">)</span>        MOVL    <span style="color:#e6db74">&#34;&#34;</span>.v<span style="color:#f92672">(</span>SB<span style="color:#f92672">)</span>, AX
+0x001c <span style="color:#ae81ff">00028</span> <span style="color:#f92672">(</span>main.go:9<span style="color:#f92672">)</span>        MOVL    AX, <span style="color:#e6db74">&#34;&#34;</span>.t+4<span style="color:#f92672">(</span>SP<span style="color:#f92672">)</span>
+0x0020 <span style="color:#ae81ff">00032</span> <span style="color:#f92672">(</span>main.go:11<span style="color:#f92672">)</span>       MOVL    <span style="color:#e6db74">&#34;&#34;</span>.v<span style="color:#f92672">(</span>SB<span style="color:#f92672">)</span>, AX
+0x0026 <span style="color:#ae81ff">00038</span> <span style="color:#f92672">(</span>main.go:11<span style="color:#f92672">)</span>       MOVL    AX, <span style="color:#e6db74">&#34;&#34;</span>.t+4<span style="color:#f92672">(</span>SP<span style="color:#f92672">)</span>
+</code></pre></div><p>不管是「x = v」还是「x = atomic.LoadInt32(&amp;v)」，对应的汇编结果一摸一样。问题越来越有趣了，让我们是否能从 <a href="https://github.com/golang/go/tree/master/src/sync/atomic">sync/atomic</a> 的源代码中找到答案：</p>
+<p>Golang 代码中只有函数声明，实际上是使用汇编实现的：</p>
+<pre><code>// doc.go
+func LoadInt32(addr *int32) (val int32)
+
+// asm.s
+TEXT ·LoadInt32(SB),NOSPLIT,$0
+	JMP runtime∕internal∕atomic·Load(SB)
+</code></pre><p>顺着路径，跳转到 <a href="https://github.com/golang/go/tree/master/src/runtime/internal/atomic">runtime/internal/atomic</a>，会发现每个平台都有独立的 Load 实现：</p>
+<p>在 amd64 平台，Load 是用 Golang 实现的，等价于直接读取：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">Load</span>(<span style="color:#a6e22e">ptr</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">uint32</span>) <span style="color:#66d9ef">uint32</span> {
+	<span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">ptr</span>
+}
+</code></pre></div><p>在 arm64 平台，Load 是用汇编实现的，并不是简单的一次操作：</p>
+<pre><code>TEXT ·Load(SB),NOSPLIT,$0-12
+	MOVD	ptr+0(FP), R0
+	LDARW	(R0), R0
+	MOVW	R0, ret+8(FP)
+	RET
+</code></pre><p>结果跃然纸上：atomic.LoadInt32 之所以存在，是因为某些平台存在特殊性，所以我们需要封装一个统一的操作，如此更有利于我们写出平台无关的代码。</p>
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/align2/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">再谈Golang内存对齐</p>
+		</a>
+	</div>
+</nav>
+
+
+
+
+
+			</div>
+			
+
+		</div>
+		<footer class="footer">
+  <div>
+    <span id="busuanzi_container_site_uv">本站总访问量<span id="busuanzi_value_site_uv"></span>次</span>
+  </div>   
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

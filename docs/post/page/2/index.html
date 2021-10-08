@@ -50,6 +50,33 @@
 	</header><article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/arch/private/" rel="bookmark">
+			在docker环境导入私有仓库的问题
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-24T15:55:52&#43;08:00">2021-08-24</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		最近我遇到了一个在 docker 环境导入私有仓库的问题：一个 Golang 项目，使用 gitlab ci 来发布，通过 gitlab runner 调用 docker-compose 来打包，但是在构建时失败了。
+让我们重回案发现场，看看是否留下了什么线索：
+首先是 .gitlab-ci.yml 文件，其相关代码片段内容如下：
+build_job: stage: build script: - make docker-build 然后是 Makefile 文件，其相关代码片段内容如下：
+.PHONY: docker-build docker-build: @docker-compose build 接着是 docker-compose.yml 文件，其相关代码片段内容如下：
+build: context: . dockerfile: Dockerfile 最后是 Dockfile 文件，其相关代码片段内容一下：
+FROM golang:1.17 AS builder WORKDIR /go/src/app COPY . . RUN go build 结果在 build 的时候报错了：
+ fatal: could not read Username for ‘https://git.domain.com’: terminal prompts disabled
+ 因为 git.
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/makefile2/" rel="bookmark">
 			记又一次对Makefile的重构
 			</a>
@@ -125,31 +152,12 @@
 	<div class="content list__excerpt post__content clearfix">
 		<p>一般来说，在 K8S 下部署服务是很简单的事儿，但是如果部署的是一个 gRPC 服务的话，那么稍不留神就可能掉坑里，个中缘由，且听我慢慢道来。</p>
 	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/inside-golang/strconv2/" rel="bookmark">
-			Golang类型转换 二
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-07-13T15:30:41&#43;08:00">2021-07-13</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/golang%E7%B1%BB%E5%9E%8B/" rel="category">Golang类型</a>
-	</span>
-    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>strconv拾遗</p>
-	</div>
 </article>
 </main>
 
 <div class="pagination">
 	<a class="pagination__item pagination__item--prev btn" href="/post/">«</a>
-	<span class="pagination__item pagination__item--current">2/4</span>
+	<span class="pagination__item pagination__item--current">2/5</span>
 	<a class="pagination__item pagination__item--next btn" href="/post/page/3/">»</a>
 </div>
 
@@ -178,7 +186,7 @@
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E5%AE%9E%E6%88%98/">实战</a>&nbsp;
-				<span class="widget__counter widget__counter--bubble">11</span>
+				<span class="widget__counter widget__counter--bubble">12</span>
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a>&nbsp;
@@ -195,11 +203,11 @@
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/atomic/">为什么会有atomic.LoadInt32</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/align2/">再谈Golang内存对齐</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/align/">浅谈Golang内存对齐</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/tars/">手把手教你用TARS</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/select/">一个select死锁问题</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/private/">在docker环境导入私有仓库的问题</a></li>
 		</ul>
 	</div>
 </div>

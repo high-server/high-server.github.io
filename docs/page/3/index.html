@@ -49,6 +49,25 @@
 	<article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/inside-golang/strconv2/" rel="bookmark">
+			Golang类型转换 二
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-07-13T15:30:41&#43;08:00">2021-07-13</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/golang%E7%B1%BB%E5%9E%8B/" rel="category">Golang类型</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		<p>strconv拾遗</p>
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/cgo/" rel="bookmark">
 			实战CGO
 			</a>
@@ -134,36 +153,12 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<div class="content list__excerpt post__content clearfix">
 		<p>Atoi/Itoa函数实现</p>
 	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/inside-golang/function/" rel="bookmark">
-			Golang 函数和 C 函数深度对比
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-05-26T17:25:49&#43;08:00">2021-05-26</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/golang%E5%8E%9F%E7%90%86/" rel="category">Golang原理</a>
-	</span>
-    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>无论是什么语言，函数都是最常被使用到的东西。</p>
-<p>我们对比一下 Golang 和 C 这两种语言的函数实现，进而我们能真正理解以下两个问题。</p>
-<ul>
-<li>为什么 C 语言只能有一个返回值，而 Golang 中可以返回多个？</li>
-<li>Golang 函数调用在性能上和 C 比有何差异？</li>
-</ul>
-	</div>
 </article>
 </main>
 
 <div class="pagination">
 	<a class="pagination__item pagination__item--prev btn" href="/page/2/">«</a>
-	<span class="pagination__item pagination__item--current">3/4</span>
+	<span class="pagination__item pagination__item--current">3/5</span>
 	<a class="pagination__item pagination__item--next btn" href="/page/4/">»</a>
 </div>
 
@@ -191,7 +186,7 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E5%AE%9E%E6%88%98/">实战</a>&nbsp;
-				<span class="widget__counter widget__counter--bubble">11</span>
+				<span class="widget__counter widget__counter--bubble">12</span>
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a>&nbsp;
@@ -208,11 +203,11 @@ func main<span style="color:#f92672">()</span> <span style="color:#f92672">{</sp
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/atomic/">为什么会有atomic.LoadInt32</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/align2/">再谈Golang内存对齐</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/align/">浅谈Golang内存对齐</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/tars/">手把手教你用TARS</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/select/">一个select死锁问题</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/private/">在docker环境导入私有仓库的问题</a></li>
 		</ul>
 	</div>
 </div>
