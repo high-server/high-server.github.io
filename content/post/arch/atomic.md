@@ -39,7 +39,7 @@ shell> go tool compile -N -l -S main.go
 0x0026 00038 (main.go:11)       MOVL    AX, "".t+4(SP)
 ```
 
-不管是「x = v」还是「x = atomic.LoadInt32(&v)」，对应的汇编结果一摸一样。问题越来越有趣了，让我们是否能从 [sync/atomic](https://github.com/golang/go/tree/master/src/sync/atomic) 的源代码中找到答案：
+不管是「x = v」还是「x = atomic.LoadInt32(&v)」，对应的汇编结果一摸一样。问题越来越有趣了，让我们看看是否能从 [sync/atomic](https://github.com/golang/go/tree/master/src/sync/atomic) 的源代码中找到答案：
 
 Golang 代码中只有函数声明，实际上是使用汇编实现的：
 
