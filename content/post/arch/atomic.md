@@ -72,4 +72,6 @@ TEXT ·Load(SB),NOSPLIT,$0-12
 	RET
 ```
 
-结果跃然纸上：atomic.LoadInt32 之所以存在，是因为某些平台存在特殊性，所以我们需要封装一个统一的操作，如此更有利于我们写出平台无关的代码。
+如上可见，atomic.LoadInt32 之所以存在，是因为某些平台存在特殊性，所以我们需要封装一个统一的操作，如此更有利于我们写出平台无关的代码。
+
+本文仅讨论了 atomic 的[原子性](https://www.1024cores.net/home/lock-free-algorithms/so-what-is-a-memory-model-and-how-to-cook-it)，实际上它还保证了[可见性](https://www.1024cores.net/home/lock-free-algorithms/so-what-is-a-memory-model-and-how-to-cook-it/visibility)，[有序性](https://www.1024cores.net/home/lock-free-algorithms/so-what-is-a-memory-model-and-how-to-cook-it/ordering)，有兴趣的朋友可以搜索内存屏障相关内容，这是一个很复杂的主题，我就不献丑了，推荐阅读：[Golang Memory Model](https://www.jianshu.com/p/1596e1d7c126)。

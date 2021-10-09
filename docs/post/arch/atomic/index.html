@@ -78,7 +78,7 @@
 0x001c <span style="color:#ae81ff">00028</span> <span style="color:#f92672">(</span>main.go:9<span style="color:#f92672">)</span>        MOVL    AX, <span style="color:#e6db74">&#34;&#34;</span>.t+4<span style="color:#f92672">(</span>SP<span style="color:#f92672">)</span>
 0x0020 <span style="color:#ae81ff">00032</span> <span style="color:#f92672">(</span>main.go:11<span style="color:#f92672">)</span>       MOVL    <span style="color:#e6db74">&#34;&#34;</span>.v<span style="color:#f92672">(</span>SB<span style="color:#f92672">)</span>, AX
 0x0026 <span style="color:#ae81ff">00038</span> <span style="color:#f92672">(</span>main.go:11<span style="color:#f92672">)</span>       MOVL    AX, <span style="color:#e6db74">&#34;&#34;</span>.t+4<span style="color:#f92672">(</span>SP<span style="color:#f92672">)</span>
-</code></pre></div><p>不管是「x = v」还是「x = atomic.LoadInt32(&amp;v)」，对应的汇编结果一摸一样。问题越来越有趣了，让我们是否能从 <a href="https://github.com/golang/go/tree/master/src/sync/atomic">sync/atomic</a> 的源代码中找到答案：</p>
+</code></pre></div><p>不管是「x = v」还是「x = atomic.LoadInt32(&amp;v)」，对应的汇编结果一摸一样。问题越来越有趣了，让我们看看是否能从 <a href="https://github.com/golang/go/tree/master/src/sync/atomic">sync/atomic</a> 的源代码中找到答案：</p>
 <p>Golang 代码中只有函数声明，实际上是使用汇编实现的：</p>
 <pre><code>// doc.go
 func LoadInt32(addr *int32) (val int32)
@@ -97,7 +97,8 @@ TEXT ·LoadInt32(SB),NOSPLIT,$0
 	LDARW	(R0), R0
 	MOVW	R0, ret+8(FP)
 	RET
-</code></pre><p>结果跃然纸上：atomic.LoadInt32 之所以存在，是因为某些平台存在特殊性，所以我们需要封装一个统一的操作，如此更有利于我们写出平台无关的代码。</p>
+</code></pre><p>如上可见，atomic.LoadInt32 之所以存在，是因为某些平台存在特殊性，所以我们需要封装一个统一的操作，如此更有利于我们写出平台无关的代码。</p>
+<p>本文仅讨论了 atomic 的<a href="https://www.1024cores.net/home/lock-free-algorithms/so-what-is-a-memory-model-and-how-to-cook-it">原子性</a>，实际上它还保证了<a href="https://www.1024cores.net/home/lock-free-algorithms/so-what-is-a-memory-model-and-how-to-cook-it/visibility">可见性</a>，<a href="https://www.1024cores.net/home/lock-free-algorithms/so-what-is-a-memory-model-and-how-to-cook-it/ordering">有序性</a>，有兴趣的朋友可以搜索内存屏障相关内容，这是一个很复杂的主题，我就不献丑了，推荐阅读：<a href="https://www.jianshu.com/p/1596e1d7c126">Golang Memory Model</a>。</p>
 		</div>
 	</article>
 </main>
