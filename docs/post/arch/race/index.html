@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>从一个data race问题学到的 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+    <meta name="keywords"  content="golang,架构技术漫谈,架构,搜狗,浏览器"/>
+	<meta name="description" content="提高单机性能，用好多机架构！">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">从一个data race问题学到的</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-10-11T13:09:31&#43;08:00">2021-10-11</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>前几天我在学习<a href="https://zh.wikipedia.org/wiki/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C">内存屏障</a>的时候搜到一篇文章「<a href="https://fanlv.wiki/2020/06/09/golang-memory-model/">Golang Memory Model</a>」，其中在介绍 CPU 缓存一致性的时候提到一个例子，带给我一些困惑，本文记录下解惑过程。</p>
+<p>既然是在介绍 CPU 缓存一致性的时候举的例子，那么理所应当与此有关，看代码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;time&#34;</span>
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">running</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">true</span>
+	<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+		println(<span style="color:#e6db74">&#34;start thread1&#34;</span>)
+		<span style="color:#a6e22e">count</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>
+		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">running</span> {
+			<span style="color:#a6e22e">count</span><span style="color:#f92672">++</span>
+		}
+		println(<span style="color:#e6db74">&#34;end thread1: count =&#34;</span>, <span style="color:#a6e22e">count</span>)
+	}()
+	<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+		println(<span style="color:#e6db74">&#34;start thread2&#34;</span>)
+		<span style="color:#66d9ef">for</span> {
+			<span style="color:#a6e22e">running</span> = <span style="color:#66d9ef">false</span>
+		}
+	}()
+	<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Hour</span>)
+}
+</code></pre></div><p>当我们通过「go run main.go」运行代码的时候，会发现第一个 goroutine 永远不会结束，就好像 running = false 没有生效一样。对此，文章把原因归结为 CPU 缓存一致性中的线程可见性问题，可是我前后看了几遍也没有看出个所以然来。细心的小伙伴不难发现代码存在 data race 问题：多个 goroutine 并发读写 running 变量，不过当我们通过「go run -race main.go」再次运行代码的时候，有趣的事情发生了，第一个 goroutine 正常结束了！</p>
+<p>理论上，既然存在 data race 问题，那么出现什么结果都可能，但是好奇心驱使我继续研究了一下，这次使用的工具是 <a href="https://github.com/golang/go/blob/master/src/cmd/compile/internal/ssa/README.md">SSA</a>，它可以展现出从源代码到汇编的过程中，编译器都做了哪些工作，并且可以把结果生成 html 文件：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; GOSSAFUNC<span style="color:#f92672">=</span>main go build -gcflags<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-N -l&#34;</span> ./main.go
+</code></pre></div><p>SSA 工具最方便的地方是它可以把源代码和汇编通过颜色对应起来：</p>
+<p><img src="https://files.catbox.moe/z2ffru.png" alt="main 函数的 ssa"></p>
+<p>说明：Golang 中的汇编一般指 Plan9 汇编，推荐阅读「<a href="https://github.com/cch123/golang-notes/blob/master/assembly.md">plan9 assembly 完全解析</a>」。</p>
+<p>不过为什么「running = false」这行源代码没有对应的汇编呢？这是因为 SSA 的工作单位是函数，上面的结果是 main 函数的结果，而「running = false」实际上属于 main 函数里第 2 个 goroutine，实际上就相当于 main.func2，重新运行 SSA：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; GOSSAFUNC<span style="color:#f92672">=</span>main.func2 go build -gcflags<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-l -N&#34;</span> ./main.go
+</code></pre></div><p>如此一来就能看到「running = false」这行源代码对应的汇编了：</p>
+<p><img src="https://files.catbox.moe/vps60h.png" alt="main.func2 函数的 ssa"></p>
+<p>其中，PCDATA 是编译器插入的和 GC 相关的信息，在本例中可以忽略，剩下的几个 JMP 跳来跳去，好像是个圈哦，就是一个空 for，和「running = false」完全没有关系。</p>
+<p>不过既然带有 race 检测的代码工作正常，那么不妨一并生成 SSA 看看结果如何：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">shell&gt; GOSSAFUNC<span style="color:#f92672">=</span>main.func2 go build -race -gcflags<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-l -N&#34;</span> ./main.go
+</code></pre></div><p>结果如下图所示，出了 JMP，还有 MOV 操作，正好对应「running = false」：</p>
+<p><img src="https://files.catbox.moe/eod3ct.png" alt="main.func2 函数的 ssa"></p>
+<p>如此一来，我们的困惑终于解开了。问题代码中的循环之所以不会结束，和所谓的「CPU 缓存一致性中的线程可见性问题」并没有任何关系，只是因为编译器把部分代码看成死代码，直接优化掉了，这个过程称之为「<a href="https://en.wikipedia.org/wiki/Dead_code_elimination">Dead code elimination</a>」，不过当激活 race 检测的时候，编译器并没有执行死代码的优化，所以程序看上去又正常了。</p>
+<p>最后，推荐一篇文章，和本文的例子相似：<a href="https://ms2008.github.io/2019/05/12/golang-data-race/">谈谈 Golang 中的 Data Race</a>（及<a href="https://ms2008.github.io/2019/05/22/golang-data-race-cont/">续</a>）。</p>
+
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/atomic/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">为什么会有atomic.LoadInt32</p>
+		</a>
+	</div>
+</nav>
+
+
+
+
+
+			</div>
+			
+
+		</div>
+		<footer class="footer">
+  <div>
+    <span id="busuanzi_container_site_uv">本站总访问量<span id="busuanzi_value_site_uv"></span>次</span>
+  </div>   
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

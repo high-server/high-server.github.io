@@ -6,7 +6,18 @@
     <description>Recent content on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 08 Oct 2021 17:09:31 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 11 Oct 2021 13:09:31 +0800</lastBuildDate><atom:link href="https://high-server.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>从一个data race问题学到的</title>
+      <link>https://high-server.github.io/post/arch/race/</link>
+      <pubDate>Mon, 11 Oct 2021 13:09:31 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/race/</guid>
+      <description>前几天我在学习内存屏障的时候搜到一篇文章「Golang Memory Model」，其中在介绍 CPU 缓存一致性的时候提到一个例子，带给我一些困惑，本文记录下解惑过程。
+既然是在介绍 CPU 缓存一致性的时候举的例子，那么理所应当与此有关，看代码：
+package main import &amp;#34;time&amp;#34; func main() { running := true go func() { println(&amp;#34;start thread1&amp;#34;) count := 1 for running { count++ } println(&amp;#34;end thread1: count =&amp;#34;, count) }() go func() { println(&amp;#34;start thread2&amp;#34;) for { running = false } }() time.Sleep(time.Hour) } 当我们通过「go run main.go」运行代码的时候，会发现第一个 goroutine 永远不会结束，就好像 running = false 没有生效一样。对此，文章把原因归结为 CPU 缓存一致性中的线程可见性问题，可是我前后看了几遍也没有看出个所以然来。细心的小伙伴不难发现代码存在 data race 问题：多个 goroutine 并发读写 running 变量，不过当我们通过「go run -race main.</description>
+    </item>
+    
     <item>
       <title>为什么会有atomic.LoadInt32</title>
       <link>https://high-server.github.io/post/arch/atomic/</link>

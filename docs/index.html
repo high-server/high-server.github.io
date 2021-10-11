@@ -49,6 +49,27 @@
 	<article class="list__item post">
 	<header class="list__header">
 		<h2 class="list__title post__title">
+			<a href="/post/arch/race/" rel="bookmark">
+			从一个data race问题学到的
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-10-11T13:09:31&#43;08:00">2021-10-11</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		前几天我在学习内存屏障的时候搜到一篇文章「Golang Memory Model」，其中在介绍 CPU 缓存一致性的时候提到一个例子，带给我一些困惑，本文记录下解惑过程。
+既然是在介绍 CPU 缓存一致性的时候举的例子，那么理所应当与此有关，看代码：
+package main import &#34;time&#34; func main() { running := true go func() { println(&#34;start thread1&#34;) count := 1 for running { count++ } println(&#34;end thread1: count =&#34;, count) }() go func() { println(&#34;start thread2&#34;) for { running = false } }() time.Sleep(time.Hour) } 当我们通过「go run main.go」运行代码的时候，会发现第一个 goroutine 永远不会结束，就好像 running = false 没有生效一样。对此，文章把原因归结为 CPU 缓存一致性中的线程可见性问题，可是我前后看了几遍也没有看出个所以然来。细心的小伙伴不难发现代码存在 data race 问题：多个 goroutine 并发读写 running 变量，不过当我们通过「go run -race main.
+	</div>
+</article><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
 			<a href="/post/arch/atomic/" rel="bookmark">
 			为什么会有atomic.LoadInt32
 			</a>
@@ -130,25 +151,6 @@
 	<div class="content list__excerpt post__content clearfix">
 		<p>在中国，有一个简单的方法可以用来判断一个互联网公司够不够大，那就是看其是否开源过 rpc 框架！比如阿里巴巴的 <a href="https://github.com/apache/dubbo">dubbo</a>，或者腾讯的 <a href="https://github.com/TarsCloud/Tars">tars</a>，小公司往往会对这些大公司的产品趋之若鹜，不过一个可悲的现实是大公司自己往往并不用他们开源的版本，这就好比皇帝总是把自己看不上眼的女人赏赐给臣民，不过能得到皇帝的赏赐总是好事，下面让我手把手教你用 tars，更具体的说是 <a href="https://github.com/TarsCloud/TarsGo">tarsgo</a>，也就是 tars 的 golang 实现。</p>
 	</div>
-</article><article class="list__item post">
-	<header class="list__header">
-		<h2 class="list__title post__title">
-			<a href="/post/arch/select/" rel="bookmark">
-			一个select死锁问题
-			</a>
-		</h2>
-		<div class="list__meta meta"><div class="meta__item-author meta__item">
-	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
-</div>
-<div class="meta__item-datetime meta__item">
-	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-08-29T21:18:16&#43;08:00">2021-08-29</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
-	</span>
-    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
-</div></div>
-	</header>
-	<div class="content list__excerpt post__content clearfix">
-		<p>话说前几天我遇到了一个死锁问题，当时想了一些办法糊弄过去了，不过并没有搞明白问题的细节，周末想起来便继续研究了一下，最终便有了这篇文章。</p>
-	</div>
 </article>
 </main>
 
@@ -181,7 +183,7 @@
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E5%AE%9E%E6%88%98/">实战</a>&nbsp;
-				<span class="widget__counter widget__counter--bubble">12</span>
+				<span class="widget__counter widget__counter--bubble">13</span>
 				</li>
 			<li class="widget__item">
 				<a class="widget__link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a>&nbsp;
@@ -198,11 +200,11 @@
 	<h4 class="widget__title">Recent Posts</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/arch/race/">从一个data race问题学到的</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/atomic/">为什么会有atomic.LoadInt32</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/align2/">再谈Golang内存对齐</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/align/">浅谈Golang内存对齐</a></li>
 			<li class="widget__item"><a class="widget__link" href="/post/arch/tars/">手把手教你用TARS</a></li>
-			<li class="widget__item"><a class="widget__link" href="/post/arch/select/">一个select死锁问题</a></li>
 		</ul>
 	</div>
 </div>
