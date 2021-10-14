@@ -100,7 +100,7 @@ hdr.Len = n
 
 > the reflect data structures SliceHeader and StringHeader declare the field Data as a uintptr to keep callers from changing the result to an arbitrary type without first importing “unsafe”. However, this means that SliceHeader and StringHeader are only valid when interpreting the content of an actual slice or string value.
 
-也就是说，只有当操作实际存在的 slice 或 string 的时候，SliceHeader 或 StringHeader 才是有效的，回想最初的代码，因为操作 reflect.SliceHeader 的时候，并没有实际存在的 slice，所以是不符合 unsafe.Pointer 使用规范的，按照要求调整一下：
+也就是说，只有当操作实际存在的 slice 或 string 的时候，SliceHeader 或 StringHeader 才是有效的，回想最初的代码，因为操作 reflect.SliceHeader 的时候，并没有实际存在的 slice，所以是不符合 unsafe.Pointer 使用规范的（[golang-nuts](https://groups.google.com/g/golang-nuts/c/Zsfk-VMd_fU/m/qJzdycRiCwAJ)），按照要求调整一下：
 
 ```golang
 func StringToSliceByte(s string) []byte {

@@ -128,7 +128,7 @@
 <blockquote>
 <p>the reflect data structures SliceHeader and StringHeader declare the field Data as a uintptr to keep callers from changing the result to an arbitrary type without first importing “unsafe”. However, this means that SliceHeader and StringHeader are only valid when interpreting the content of an actual slice or string value.</p>
 </blockquote>
-<p>也就是说，只有当操作实际存在的 slice 或 string 的时候，SliceHeader 或 StringHeader 才是有效的，回想最初的代码，因为操作 reflect.SliceHeader 的时候，并没有实际存在的 slice，所以是不符合 unsafe.Pointer 使用规范的，按照要求调整一下：</p>
+<p>也就是说，只有当操作实际存在的 slice 或 string 的时候，SliceHeader 或 StringHeader 才是有效的，回想最初的代码，因为操作 reflect.SliceHeader 的时候，并没有实际存在的 slice，所以是不符合 unsafe.Pointer 使用规范的（<a href="https://groups.google.com/g/golang-nuts/c/Zsfk-VMd_fU/m/qJzdycRiCwAJ">golang-nuts</a>），按照要求调整一下：</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">StringToSliceByte</span>(<span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>) []<span style="color:#66d9ef">byte</span> {
 	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">b</span> []<span style="color:#66d9ef">byte</span>
 	<span style="color:#a6e22e">l</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">s</span>)
