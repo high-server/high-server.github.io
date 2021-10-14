@@ -6,7 +6,20 @@
     <description>Recent content in Posts on 架构技术漫谈</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 11 Oct 2021 13:09:31 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 14 Oct 2021 14:09:31 +0800</lastBuildDate><atom:link href="https://high-server.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>聊一个string和[]byte转换问题</title>
+      <link>https://high-server.github.io/post/arch/str2bytes/</link>
+      <pubDate>Thu, 14 Oct 2021 14:09:31 +0800</pubDate>
+      
+      <guid>https://high-server.github.io/post/arch/str2bytes/</guid>
+      <description>前几天闲聊的时候，景埕说网上很多 string 和 []byte 的转换都是有问题的，当时并没有在意，转过身没几天我偶然看到字节跳动的一篇文章，其中提到了他们是如何优化 string 和 []byte 转换的，我便问景埕有没有问题，讨论过程中学到了很多，于是便有了这篇总结。
+让我们看看问题代码，类似的 string 和 []byte 转换代码在网上非常常见：
+func StringToSliceByte(s string) []byte { l := len(s) return *(*[]byte)(unsafe.Pointer(&amp;amp;reflect.SliceHeader{ Data: (*(*reflect.StringHeader)(unsafe.Pointer(&amp;amp;s))).Data, Len: l, Cap: l, })) } 大家之所以不愿意直接通过 []byte(string) 把 string 转换为 []byte，是因为那样会牵扯内存拷贝，而通过 unsafe.Pointer 来做类型转换，没有内存拷贝，从而达到提升性能的目的。
+问题代码到底有没有问题？其实当我把代码拷贝到 vscode 之后就有提示了：
+ SliceHeader is the runtime representation of a slice. It cannot be used safely or portably and its representation may change in a later release. Moreover, the Data field is not sufficient to guarantee the data it references will not be garbage collected, so programs must keep a separate, correctly typed pointer to the underlying data.</description>
+    </item>
+    
     <item>
       <title>从一个data race问题学到的</title>
       <link>https://high-server.github.io/post/arch/race/</link>

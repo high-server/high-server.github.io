@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>聊一个string和[]byte转换问题 - 架构技术漫谈</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+    <meta name="keywords"  content="golang,架构技术漫谈,架构,搜狗,浏览器"/>
+	<meta name="description" content="提高单机性能，用好多机架构！">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="架构技术漫谈" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/avatars/team.jpg">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">架构技术漫谈</div>
+					<div class="logo__tagline">提高单机性能，用好多机架构！</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">聊一个string和[]byte转换问题</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">搜狗商业技术团队</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2021-10-14T14:09:31&#43;08:00">2021-10-14</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E5%AE%9E%E6%88%98/" rel="category">实战</a>
+	</span>
+    <span class="busuanzi_container meta__text" id="busuanzi_container_page_pv">阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+</div></div>
+		</header><div class="content post__content clearfix">
+			<p>前几天闲聊的时候，<a href="https://github.com/diogin">景埕</a>说网上很多 string 和 []byte 的转换都是有问题的，当时并没有在意，转过身没几天我偶然看到<a href="https://mp.weixin.qq.com/s/Xoaoiotl7ZQoG2iXo9_DWg">字节跳动的一篇文章</a>，其中提到了他们是如何优化 string 和 []byte 转换的，我便问景埕有没有问题，讨论过程中学到了很多，于是便有了这篇总结。</p>
+<p>让我们看看问题代码，类似的 string 和 []byte 转换代码在网上非常常见：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">StringToSliceByte</span>(<span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>) []<span style="color:#66d9ef">byte</span> {
+	<span style="color:#a6e22e">l</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">s</span>)
+	<span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span>(<span style="color:#f92672">*</span>[]<span style="color:#66d9ef">byte</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SliceHeader</span>{
+		<span style="color:#a6e22e">Data</span>: (<span style="color:#f92672">*</span>(<span style="color:#f92672">*</span><span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">StringHeader</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">s</span>))).<span style="color:#a6e22e">Data</span>,
+		<span style="color:#a6e22e">Len</span>:  <span style="color:#a6e22e">l</span>,
+		<span style="color:#a6e22e">Cap</span>:  <span style="color:#a6e22e">l</span>,
+	}))
+}
+</code></pre></div><p>大家之所以不愿意直接通过 []byte(string) 把 string 转换为 []byte，是因为那样会牵扯内存拷贝，而通过 <a href="https://pkg.go.dev/unsafe#Pointer">unsafe.Pointer</a> 来做类型转换，没有内存拷贝，从而达到提升性能的目的。</p>
+<p>问题代码到底有没有问题？其实当我把代码拷贝到 vscode 之后就有提示了：</p>
+<blockquote>
+<p>SliceHeader is the runtime representation of a slice. It cannot be used safely or portably and its representation may change in a later release. Moreover, the Data field is not sufficient to guarantee the data it references will not be garbage collected, so programs must keep a separate, correctly typed pointer to the underlying data.</p>
+</blockquote>
+<p>首先，<a href="https://pkg.go.dev/reflect#SliceHeader">reflect.SliceHeader</a> 作为 slice 的运行时表示，以后可能会改变，直接使用它存在风险；其次，Data 字段无法保证它指向的数据不被 GC 垃圾回收。</p>
+<p>前一个问题还好说，但是后面提的 GC 问题则是个大问题！为什么会存在 GC 问题，我们不妨看看 reflect.SliceHeader 和 reflect.StringHeader 的定义：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">SliceHeader</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">Data</span> <span style="color:#66d9ef">uintptr</span>
+	<span style="color:#a6e22e">Len</span>  <span style="color:#66d9ef">int</span>
+	<span style="color:#a6e22e">Cap</span>  <span style="color:#66d9ef">int</span>
+}
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">StringHeader</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">Data</span> <span style="color:#66d9ef">uintptr</span>
+	<span style="color:#a6e22e">Len</span>  <span style="color:#66d9ef">int</span>
+}
+</code></pre></div><p>如上所示，Data 的类型是 uintptr，虽然有一个 ptr 后缀，但是它本质上还是一个整型，并不是指针，也就是说，它并不会持有它指向的数据，所以数据可能会被 GC 回收。</p>
+<p>知道了前因后果，那么让我们构造一段代码来证明存在 GC 问题：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+	<span style="color:#e6db74">&#34;reflect&#34;</span>
+	<span style="color:#e6db74">&#34;runtime&#34;</span>
+	<span style="color:#e6db74">&#34;unsafe&#34;</span>
+)
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;%s\n&#34;</span>, <span style="color:#a6e22e">test</span>())
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">test</span>() []<span style="color:#66d9ef">byte</span> {
+	<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">GC</span>()
+	<span style="color:#a6e22e">x</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">byte</span>, <span style="color:#ae81ff">5</span>)
+	<span style="color:#a6e22e">x</span>[<span style="color:#ae81ff">0</span>] = <span style="color:#e6db74">&#39;h&#39;</span>
+	<span style="color:#a6e22e">x</span>[<span style="color:#ae81ff">1</span>] = <span style="color:#e6db74">&#39;e&#39;</span>
+	<span style="color:#a6e22e">x</span>[<span style="color:#ae81ff">2</span>] = <span style="color:#e6db74">&#39;l&#39;</span>
+	<span style="color:#a6e22e">x</span>[<span style="color:#ae81ff">3</span>] = <span style="color:#e6db74">&#39;l&#39;</span>
+	<span style="color:#a6e22e">x</span>[<span style="color:#ae81ff">4</span>] = <span style="color:#e6db74">&#39;o&#39;</span>
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">StringToSliceByte1</span>(string(<span style="color:#a6e22e">x</span>))
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">StringToSliceByte1</span>(<span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>) []<span style="color:#66d9ef">byte</span> {
+	<span style="color:#a6e22e">l</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">s</span>)
+	<span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span>(<span style="color:#f92672">*</span>[]<span style="color:#66d9ef">byte</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SliceHeader</span>{
+		<span style="color:#a6e22e">Data</span>: (<span style="color:#f92672">*</span>(<span style="color:#f92672">*</span><span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">StringHeader</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">s</span>))).<span style="color:#a6e22e">Data</span>,
+		<span style="color:#a6e22e">Len</span>:  <span style="color:#a6e22e">l</span>,
+		<span style="color:#a6e22e">Cap</span>:  <span style="color:#a6e22e">l</span>,
+	}))
+}
+</code></pre></div><p>注：因为静态字符串存储在 TEXT 区，不会被 GC 回收，所以使用了动态字符串。</p>
+<p>当我们运行上面的代码，并不会输出 hello，而是会输出乱码，原因是对应的数据已经被 GC 回收了，如果我们去掉 runtime.GC() 再运行，那么输出大概率会恢复正常。</p>
+<p>由此可见，因为 Data 是 uintptr 类型，所以任何对它的赋值都是不安全的。原本问题到这里就应该告一段落了，但是 unsafe.Pointer 文档里恰好就有一个直接对 Data 赋值的例子：Conversion of a reflect.SliceHeader or reflect.StringHeader Data field to or from Pointer.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>
+<span style="color:#a6e22e">hdr</span> <span style="color:#f92672">:=</span> (<span style="color:#f92672">*</span><span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">StringHeader</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">s</span>))
+<span style="color:#a6e22e">hdr</span>.<span style="color:#a6e22e">Data</span> = uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#a6e22e">p</span>))
+<span style="color:#a6e22e">hdr</span>.<span style="color:#a6e22e">Len</span> = <span style="color:#a6e22e">n</span>
+</code></pre></div><p>到底是文档有误，还是我们的推断错了，继续看文档里的说明：</p>
+<blockquote>
+<p>the reflect data structures SliceHeader and StringHeader declare the field Data as a uintptr to keep callers from changing the result to an arbitrary type without first importing “unsafe”. However, this means that SliceHeader and StringHeader are only valid when interpreting the content of an actual slice or string value.</p>
+</blockquote>
+<p>也就是说，只有当操作实际存在的 slice 或 string 的时候，SliceHeader 或 StringHeader 才是有效的，回想最初的代码，因为操作 reflect.SliceHeader 的时候，并没有实际存在的 slice，所以是不符合 unsafe.Pointer 使用规范的，按照要求调整一下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">StringToSliceByte</span>(<span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>) []<span style="color:#66d9ef">byte</span> {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">b</span> []<span style="color:#66d9ef">byte</span>
+	<span style="color:#a6e22e">l</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">s</span>)
+	<span style="color:#a6e22e">p</span> <span style="color:#f92672">:=</span> (<span style="color:#f92672">*</span><span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SliceHeader</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">b</span>))
+	<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Data</span> = (<span style="color:#f92672">*</span><span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">StringHeader</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">s</span>)).<span style="color:#a6e22e">Data</span>
+	<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Len</span> = <span style="color:#a6e22e">l</span>
+	<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Cap</span> = <span style="color:#a6e22e">l</span>
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">b</span>
+}
+</code></pre></div><p>再用测试代码跑一下，国藩发现输出正常了。不过有人可能会问了，之前不是说了 uintptr 不是指针，不能阻止数据被 GC 回收，可是为什么 GC 没有效果？实际上这是因为编译器对 *reflect.{Slice,String}Header 做了<a href="https://github.com/golang/go/issues/19168">特殊处理</a>，具体细节不展开了。</p>
+<p>如果你想验证是否存在特殊处理，可以使用自定义的类型反向验证一下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">StringHeader</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">Data</span> <span style="color:#66d9ef">uintptr</span>
+	<span style="color:#a6e22e">Len</span>  <span style="color:#66d9ef">int</span>
+}
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">SliceHeader</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">Data</span> <span style="color:#66d9ef">uintptr</span>
+	<span style="color:#a6e22e">Len</span>  <span style="color:#66d9ef">int</span>
+	<span style="color:#a6e22e">Cap</span>  <span style="color:#66d9ef">int</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">StringToSliceByte</span>(<span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>) []<span style="color:#66d9ef">byte</span> {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">b</span> []<span style="color:#66d9ef">byte</span>
+	<span style="color:#a6e22e">l</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">s</span>)
+	<span style="color:#a6e22e">p</span> <span style="color:#f92672">:=</span> (<span style="color:#f92672">*</span><span style="color:#a6e22e">SliceHeader</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">b</span>))
+	<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Data</span> = (<span style="color:#f92672">*</span><span style="color:#a6e22e">StringHeader</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">s</span>)).<span style="color:#a6e22e">Data</span>
+	<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Len</span> = <span style="color:#a6e22e">l</span>
+	<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Cap</span> = <span style="color:#a6e22e">l</span>
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">b</span>
+}
+</code></pre></div><p>你会发现，如果没有使用 reflect 里的类型，那么输出就又不正常了。从而反向验证了编译器确实对 *reflect.{Slice,String}Header 做了特殊处理。</p>
+<p>现在，我们基本搞清楚了 string 和 []byte 转换中的各种坑，下面看看如何写出准确的转换代码，虽然编译器在其中耍了一些小动作，但是我们不应该依赖这些黑科技。</p>
+<p>既然 uintptr 不是指针，那么我们改用 unsafe.Pointer，如此数据就不会被 GC 回收了：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">StringHeader</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">Data</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>
+	<span style="color:#a6e22e">Len</span>  <span style="color:#66d9ef">int</span>
+}
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">SliceHeader</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">Data</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>
+	<span style="color:#a6e22e">Len</span>  <span style="color:#66d9ef">int</span>
+	<span style="color:#a6e22e">Cap</span>  <span style="color:#66d9ef">int</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">StringToSliceByte3</span>(<span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>) []<span style="color:#66d9ef">byte</span> {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">b</span> []<span style="color:#66d9ef">byte</span>
+	<span style="color:#a6e22e">l</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">s</span>)
+	<span style="color:#a6e22e">p</span> <span style="color:#f92672">:=</span> (<span style="color:#f92672">*</span><span style="color:#a6e22e">SliceHeader</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">b</span>))
+	<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Data</span> = (<span style="color:#f92672">*</span><span style="color:#a6e22e">StringHeader</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">s</span>)).<span style="color:#a6e22e">Data</span>
+	<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Len</span> = <span style="color:#a6e22e">l</span>
+	<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Cap</span> = <span style="color:#a6e22e">l</span>
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">b</span>
+}
+</code></pre></div><p>不过更简单的做法是彻底抛弃 reflect 包，具体参考 <a href="https://github.com/gin-gonic/gin/blob/master/internal/bytesconv/bytesconv.go">gin 中的 bytesconv</a>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">StringToBytes</span>(<span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>) []<span style="color:#66d9ef">byte</span> {
+	<span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span>(<span style="color:#f92672">*</span>[]<span style="color:#66d9ef">byte</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(
+		<span style="color:#f92672">&amp;</span><span style="color:#66d9ef">struct</span> {
+			<span style="color:#66d9ef">string</span>
+			<span style="color:#a6e22e">Cap</span> <span style="color:#66d9ef">int</span>
+		}{<span style="color:#a6e22e">s</span>, len(<span style="color:#a6e22e">s</span>)},
+	))
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">BytesToString</span>(<span style="color:#a6e22e">b</span> []<span style="color:#66d9ef">byte</span>) <span style="color:#66d9ef">string</span> {
+	<span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span>(<span style="color:#f92672">*</span><span style="color:#66d9ef">string</span>)(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">b</span>))
+}
+</code></pre></div><p>至此，我们完美解决了 string 和 []byte 的转换问题。</p>
+
+		</div>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="搜狗商业技术 avatar" src="/img/avatars/team.jpg" class="avatar" height="80" width="80">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">搜狗商业技术</span>
+	</div>
+	<div class="authorbox__description">
+		搜狗商业技术团队在负责搜狗 PC 浏览器，搜狗手机助手等相关项目的后端技术开发工作。
+	</div></div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/arch/race/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">从一个data race问题学到的</p>
+		</a>
+	</div>
+</nav>
+
+
+
+
+
+			</div>
+			
+
+		</div>
+		<footer class="footer">
+  <div>
+    <span id="busuanzi_container_site_uv">本站总访问量<span id="busuanzi_value_site_uv"></span>次</span>
+  </div>   
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 搜狗商业技术团队.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>
